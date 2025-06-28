@@ -1,7 +1,4 @@
----
-
-```markdown
-# 🦄 UnicornX OS (Internal Platform Docs.)
+# 🦄 UnicornX OS
 
 > บันทึกแนวคิด, โครงสร้าง, งาน และความคืบหน้าสำหรับทีม dev / content / creator by billlzzz10  
 > [🔗 UnicornX-OS Notion Dashboard (เฉพาะทีม)](https://www.notion.so/UnicornX-OS-2205e81a91ff8015a7a9db9a312771e9)
