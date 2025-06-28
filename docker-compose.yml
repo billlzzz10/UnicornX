@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Frontend (Next.js)
+  client:
+    build:
+      context: ./packages/client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./packages/client:/app
+      - /app/node_modules
+    depends_on:
+      - server
+
+  # Backend (FastAPI)
+  server:
+    build:
+      context: ./packages/server
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/unicornx_db
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./packages/server:/app
+    depends_on:
+      - db
+      - redis
+
+  # Database (PostgreSQL)
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=unicornx_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Cache & Queue (Redis)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:

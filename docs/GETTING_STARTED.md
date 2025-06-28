@@ -1,0 +1,100 @@
+# การเริ่มต้นโปรเจกต์ UnicornX OS
+
+## ขั้นตอนการติดตั้งและเรียกใช้งาน
+
+### 1. Prerequisites
+
+ตรวจสอบให้แน่ใจว่าคุณมีซอฟต์แวร์เหล่านี้ติดตั้งแล้ว:
+
+- **Node.js** (v18 หรือสูงกว่า)
+- **Python** (v3.9 หรือสูงกว่า)
+- **PostgreSQL** (v13 หรือสูงกว่า)
+- **Redis** (v6 หรือสูงกว่า)
+- **Git**
+
+### 2. การติดตั้ง
+
+```bash
+# Clone repository
+git clone <repository-url>
+cd UnicornX
+
+# ติดตั้ง dependencies สำหรับ Frontend
+cd packages/client
+npm install
+
+# กลับไปที่ root และติดตั้ง Python dependencies
+cd ../../packages/server
+pip install -r requirements.txt
+
+# สร้าง environment file
+cd ../../
+cp .env.example .env
+```
+
+### 3. การตั้งค่า Environment Variables
+
+แก้ไขไฟล์ `.env` และใส่ค่าที่เหมาะสม:
+
+```env
+DATABASE_URL=postgresql://username:password@localhost:5432/unicornx_db
+OPENAI_API_KEY=your_openai_api_key_here
+# ... และค่าอื่น ๆ
+```
+
+### 4. การเรียกใช้งาน
+
+#### แบบ Development (แยกคำสั่ง)
+
+```bash
+# Terminal 1: เรียกใช้ Backend
+cd packages/server
+python main.py
+
+# Terminal 2: เรียกใช้ Frontend
+cd packages/client
+npm run dev
+```
+
+#### แบบ Docker (แนะนำ)
+
+```bash
+# เรียกใช้ทั้งระบบด้วย Docker
+docker-compose up --build
+```
+
+### 5. การเข้าถึง
+
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
+
+## โครงสร้างโปรเจกต์
+
+```
+UnicornX/
+├── packages/
+│   ├── client/          # Next.js Frontend
+│   ├── server/          # FastAPI Backend
+│   └── shared/          # Shared types and utilities
+├── docs/                # Documentation
+├── docker-compose.yml   # Docker configuration
+└── README.md           # Project overview
+```
+
+## Phase 0 Checklist
+
+- [x] โครงสร้างโปรเจกต์
+- [x] Next.js Frontend setup
+- [x] FastAPI Backend setup
+- [x] Docker configuration
+- [ ] Database schema design
+- [ ] Basic authentication
+- [ ] First API endpoints
+- [ ] Basic UI components
+
+## ขั้นตอนถัดไป
+
+1. **Database Schema Design**: ออกแบบโครงสร้างฐานข้อมูลสำหรับ 4 โมดูลหลัก
+2. **Authentication System**: ระบบ login/register
+3. **Basic Task Management**: เริ่มพัฒนา Catalyst System พื้นฐาน
