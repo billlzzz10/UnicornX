@@ -1,14 +1,9 @@
-# README.md ที่ตอบโจทย์คุณ
-
-```markdown
 <div align="center">
-  <img src="https://raw.githubusercontent.com/billlzzz10/UnicornX/main/docs/assets/logo/UnicornX-logo-title-dark.png" width="320" alt="UnicornX Logo"/>
+  <img src="https://raw.githubusercontent.com/billlzzz10/UnicornX/main/docs/assets/logo/UnicornX-logo-title-dark.png" width="340" alt="UnicornX Logo"/>
   <br>
-  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaWo2c3R2b2JkNWRuY2p0YzlwY2Z5a2h3c2hzZ2d4b2pqN2h2Z3N1ZCZjdD1n/Nx0rz3jtxtEre/giphy.gif" width="80" alt="Saturn ring anime"/>
-  <h1 style="color:#7c44c2; font-family: 'Prompt', sans-serif;">UnicornX: สะท้อนจักรวาลแห่งแรงบันดาลใจและเทคโนโลยี</h1>
-  <p style="color:#9E8AD7; font-size:1.2em;">
-    แพลตฟอร์มกลางของ<br>
-    <b>โค้ด | คอนเทนต์ | แรงบันดาลใจ | นิยาย ROF | พอดแคสต์</b>
+  <h1 style="color:#7c44c2;">UnicornX Platform</h1>
+  <p style="color:#9E8AD7;font-size:1.2em;">
+    ศูนย์รวมแรงบันดาลใจ เทคโนโลยี นิยาย และงานสร้างสรรค์ของ billlzzz10
   </p>
   <img src="https://img.shields.io/github/languages/top/billlzzz10/UnicornX?style=for-the-badge&color=7c44c2">
   <img src="https://img.shields.io/github/stars/billlzzz10/UnicornX?style=for-the-badge&color=ff80bf">
@@ -17,61 +12,110 @@
 
 ---
 
-## 🪐 Interactive Dashboard
+## 🚀 ลิงก์สำคัญและผลงาน
 
-<!-- GitHub Readme Stats -->
-<p align="center">
-  <img src="https://github-readme-stats.vercel.app/api?username=billlzzz10&show_icons=true&theme=radical&hide=prs&icon_color=ff80bf&title_color=7c44c2&text_color=9E8AD7&bg_color=282c34" width="430">
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=billlzzz10&layout=compact&theme=radical&title_color=7c44c2&text_color=9E8AD7&bg_color=282c34" width="330">
-</p>
-
-<!-- Mermaid graph Example (Skill Tree) -->
-<details>
-  <summary><b>🌌 Skill Tree & Repo Structure (คลิกเพื่อขยาย)</b></summary>
-
-```mermaid
-graph TD
-    A[UnicornX Universe]:::center
-    subgraph Orbit: Content
-      B1(นิยาย ROF):::content --> A
-      B2(Podcast):::content --> A
-      B3(Blog/Article):::content --> A
-    end
-    subgraph Orbit: Tech
-      C1(React/TS WebApp):::tech --> A
-      C2(Node.js Backend):::tech --> A
-      C3(Google Cloud & GHActions):::tech --> A
-    end
-    subgraph Orbit: Inspire
-      D1(Storytelling):::inspire --> A
-      D2(Motivation):::inspire --> A
-    end
-    classDef center fill:#7c44c2,stroke:#ff80bf,color:#fff,stroke-width:2px;
-    classDef content fill:#48d1cc,stroke:#fff;
-    classDef tech fill:#9e8ad7,stroke:#fff;
-    classDef inspire fill:#ff80bf,stroke:#fff;
-```
-</details>
+- 🪐 [UnicornX-OS (Notion Dashboard)](https://www.notion.so/UnicornX-OS-2205e81a91ff8015a7a9db9a312771e9)
+- 📖 [นิยาย ROF (Read Only Fantasy)](https://www.notion.so/ROF-Story-00c7ea4e34e645cf8f4c9b719c5e9e3e)
+- 🎙️ [Podcast ช่องสร้างแรงบันดาลใจ](https://www.notion.so/UnicornX-OS-2205e81a91ff8015a7a9db9a312771e9)
 
 ---
 
-## 🏗️ โครงสร้างรีโป (Repo Structure)
+## 📊 Dashboard & Stats
+
+<p align="center">
+  <img src="https://github-readme-stats.vercel.app/api?username=billlzzz10&show_icons=true&theme=radical&hide=prs&icon_color=ff80bf&title_color=7c44c2&text_color=9E8AD7&bg_color=282c34" width="410">
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=billlzzz10&layout=compact&theme=radical&title_color=7c44c2&text_color=9E8AD7&bg_color=282c34" width="330">
+</p>
+
+---
+
+## 🪐 Project Timeline
+
+```mermaid
+gantt
+  dateFormat  YYYY-MM-DD
+  title UnicornX Project Timeline
+  section การวางแผน
+    Idea & Design         :done,    des1, 2024-06-01,2024-06-15
+    Notion Dashboard      :done,    des2, 2024-06-10,2024-06-20
+  section พัฒนา
+    Frontend (React/TS)   :active,  dev1, 2024-06-20,2024-07-10
+    Backend (Node.js)     :         dev2, 2024-06-25,2024-07-15
+    API Integration       :         dev3, 2024-07-01,2024-07-20
+    AI Core Runner        :         dev4, 2024-07-10,2024-07-25
+  section ต่อยอด
+    Podcast/Novel Publish :         pub1, 2024-07-25,2024-08-10
+    Dashboard Analytics   :         pub2, 2024-07-28,2024-08-15
+```
+
+---
+
+## 🧩 โมดูลเชื่อมโยงแพลตฟอร์ม-ดาต้าเบส-API
+
+```mermaid
+graph TD
+  U[UnicornX Platform]:::platform
+  FE[Frontend<br/>(React/TS)]:::frontend --> U
+  BE[Backend<br/>(Node.js)]:::backend --> U
+  DB[(Database<br/>PostgreSQL)]:::db --> BE
+
+  AI[AI Runner Classes<br/>(GPT-4o, Gemini, Claude)]:::ai --> BE
+  API1[Content API]:::api --> BE
+  API2[Podcast API]:::api --> BE
+  API3[Novel API]:::api --> BE
+
+  FE --> API1
+  FE --> API2
+  FE --> API3
+
+  classDef platform fill:#7c44c2,stroke:#fff,stroke-width:2px;
+  classDef frontend fill:#48d1cc,stroke:#fff;
+  classDef backend fill:#9E8AD7,stroke:#fff;
+  classDef db fill:#ff80bf,stroke:#fff;
+  classDef ai fill:#fcb900,stroke:#282c34;
+  classDef api fill:#e75480,stroke:#fff;
+```
+
+---
+
+## 🔗 การเชื่อมโยง API กับ AI Runner Classes
+
+```mermaid
+flowchart LR
+  FE[Frontend] --> API[API Gateway]
+  API -->|REST/GraphQL| BE[Backend]
+  BE -->|invoke| AI1[GPT-4o Runner]
+  BE -->|invoke| AI2[Gemini Runner]
+  BE -->|invoke| AI3[Claude Runner]
+  AI1 -->|ตอบกลับ| BE
+  AI2 -->|ตอบกลับ| BE
+  AI3 -->|ตอบกลับ| BE
+  BE --> API --> FE
+```
+
+---
+
+## 🗂️ โครงสร้างรีโป
+
+<details>
+<summary>คลิกเพื่อดูรายละเอียด</summary>
 
 ```
 UnicornX/
 ├── packages/         # โค้ดหลัก (frontend/backend)
 ├── docs/             # เอกสาร, โลโก้, อาร์ตเวิร์ก, นิยาย
-├── scripts/          # เครื่องมือ dev/tooling
+├── scripts/          # dev tools, automation
 ├── .github/          # GitHub Actions, templates
 ├── docker-compose.yml
 ├── package.json
 ├── README.md
 ...
 ```
+</details>
 
 ---
 
-## 🚦 GitHub Actions (CI/CD ตัวอย่าง)
+## ⚡ GitHub Actions ตัวอย่าง (CI/CD)
 
 ```yaml
 # .github/workflows/ci.yml
@@ -98,42 +142,30 @@ jobs:
 
 ---
 
-## 🌈 Brand Colors & Visual
+## 🌈 Brand Style
 
-| สีแบรนด์      | โค้ด HEX  | ตัวอย่าง           |
-|---------------|:---------:|:-------------------:|
-| Saturn Violet | #7c44c2   | ![#7c44c2](https://via.placeholder.com/30/7c44c2/ffffff?text=+) |
-| Neptune Blue  | #48d1cc   | ![#48d1cc](https://via.placeholder.com/30/48d1cc/ffffff?text=+) |
-| Pink Dream    | #ff80bf   | ![#ff80bf](https://via.placeholder.com/30/ff80bf/ffffff?text=+) |
-| Dream Gray    | #9E8AD7   | ![#9E8AD7](https://via.placeholder.com/30/9E8AD7/ffffff?text=+) |
-
----
-
-## 🦄 About
-
-> “UnicornX คือจักรวาลแห่งแรงบันดาลใจ เทคโนโลยี และการสร้างสรรค์ ที่เชื่อมโยงทุกสิ่งเข้าด้วยกัน”
-
-- **Frontend:** React, TypeScript, Vite
-- **Backend:** Node.js, Express
-- **Cloud:** Google Cloud, Docker
-- **Content:** นิยาย ROF, Podcast, Blog
-- **AI Core:** GPT-4o
+| โทนสี      | Hex       | ตัวอย่าง           |
+|:-----------|:---------:|:------------------:|
+| Violet     | #7c44c2   | ![#7c44c2](https://via.placeholder.com/30/7c44c2/fff?text=+) |
+| Blue       | #48d1cc   | ![#48d1cc](https://via.placeholder.com/30/48d1cc/fff?text=+) |
+| Pink       | #ff80bf   | ![#ff80bf](https://via.placeholder.com/30/ff80bf/fff?text=+) |
+| Gray       | #9E8AD7   | ![#9E8AD7](https://via.placeholder.com/30/9E8AD7/fff?text=+) |
 
 ---
 
-<p align="center">
-  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaWo2c3R2b2JkNWRuY2p0YzlwY2Z5a2h3c2hzZ2d4b2pqN2h2Z3N1ZCZjdD1n/Nx0rz3jtxtEre/giphy.gif" width="100"><br>
-  <b>Let’s build your universe!</b>
-</p>
+<div align="center">
+  <b>🌠 UnicornX: สะท้อนจักรวาลแห่งแรงบันดาลใจและเทคโนโลยี 🌠</b><br>
+  <a href="https://www.notion.so/UnicornX-OS-2205e81a91ff8015a7a9db9a312771e9"><img src="https://img.shields.io/badge/Notion-UnicornX--OS-7c44c2?logo=notion&logoColor=fff&style=for-the-badge"></a>
+</div>
 ```
 
 ---
 
-### วิธีนำไปใช้ & คำแนะนำ
-- เปลี่ยนลิงก์โลโก้/ภาพ gif ให้ตรงกับของคุณจริง (หรืออัปโหลดใน docs/assets)
-- Mermaid diagram จะ interactive (expand/collapse) ถ้าเปิดใน GitHub web
-- Dashboard ใช้ badge, GitHub Readme Stats, Mermaid, gif/ภาพ
-- หากต้องการแดชบอร์ดแบบ React/Next ให้แยกเป็นหน้าใน unicornx-web ได้
+### หมายเหตุเพิ่มเติม
+- Mermaid Diagram ใช้งานบน GitHub Web ได้เลย (ดู interactive/expand/zoom)
+- ลิงก์ Notion สามารถเปลี่ยนชื่อหรือลิงก์ได้ตามต้องการ
+- Dashboard ใช้ stats จาก GitHub และ badge สีตรงแบรนด์
+- คุณสามารถเพิ่ม gif หรือภาพ SVG ได้อีกเพื่อเพิ่มความ “ขยับ” มากขึ้น
+- หากต้องการแดชบอร์ดอินเตอร์แอคทีฟจริง ๆ แนะนำสร้างหน้า React เพิ่มในแพลตฟอร์ม
 
-ถ้าต้องการโค้ดตัวอย่างสำหรับแดชบอร์ด React แบบ interactive จริงๆ สามารถแจ้งได้เลยครับ!  
-หรืออยากปรับแต่งสี โลโก้ ไฟล์ action เพิ่มเติม—ก็แค่บอกมาเลยครับ 😊
+ถ้าต้องการให้ generate README.md แบบ markdown file จริง หรือใส่รายละเอียดเพิ่มในแต่ละโมดูล/AI runner แจ้งรายละเอียดได้เลยครับ!
