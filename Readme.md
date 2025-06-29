@@ -50,7 +50,7 @@ gantt
 ---
 
 ## 🧩 โมดูลเชื่อมโยงแพลตฟอร์ม-ดาต้าเบส-API
-
+---
 ```mermaid
 graph TD
   U[UnicornX Platform]:::platform
@@ -77,7 +77,7 @@ graph TD
 ---
 
 ## 🔗 การเชื่อมโยง API กับ AI Runner Classes
-
+---
 ```mermaid
 flowchart LR
   FE[Frontend] --> API[API Gateway]
@@ -93,7 +93,7 @@ flowchart LR
 ---
 
 ## 🗂️ โครงสร้างรีโป
-
+---
 <details>
 <summary>คลิกเพื่อดูรายละเอียด</summary>
 
@@ -112,7 +112,7 @@ UnicornX/
 ---
 
 ## ⚡ GitHub Actions ตัวอย่าง (CI/CD)
-
+---
 ```yaml
 # .github/workflows/ci.yml
 name: UnicornX CI
