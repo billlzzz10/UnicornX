@@ -1,0 +1,2077 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ashval Business OS - Complete AI Dashboard</title>
+
+    <!-- ใช้ CDN ที่เชื่อถือได้ -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      defer
+    ></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+
+    <script>
+      tailwind.config = {
+          darkMode: 'class',
+          theme: {
+              extend: {
+                  colors: {
+                      primary: '#5D5CDE',
+                      secondary: '#8B5FBF',
+                      accent: '#FF6B9D',
+                      success: '#4ADE80',
+                      warning: '#FBBF24',
+                      error: '#EF4444',
+                      'base-100': '#ffffff',
+                      'base-200': '#f9fafb',
+                      'base-300': '#f3f4f6',
+                      'dark-base-100': '#1f2937',
+                      'dark-base-200': '#374151',
+                      'dark-base-300': '#4b5563',
+                  }
+              }
+          }
+      }
+    </script>
+
+    <style>
+      /* ใช้ฟอนต์ system แทน Noto Sans Thai */
+      * { font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; scroll-behavior: smooth; }
+
+      .glass {
+          background: rgba(255, 255, 255, 0.5);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .dark .glass {
+          background: rgba(29, 28, 45, 0.5);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .btn-3d {
+          transform: translateY(0px);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+          transition: all 0.15s ease-in-out;
+      }
+      .btn-3d:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(93, 92, 222, 0.3);
+      }
+      .btn-3d:active {
+          transform: translateY(1px);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+
+      /* กราฟวงกลม 3 ชั้นแบบฟิตเนส */
+      .fitness-chart {
+          position: relative;
+          width: 280px;
+          height: 280px;
+          margin: auto;
+      }
+      .fitness-circle {
+          position: absolute;
+          border-radius: 50%;
+          width: 100%;
+          height: 100%;
+          clip: rect(0px, 280px, 280px, 140px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+      }
+      .fitness-circle-inner {
+          width: 85%;
+          height: 85%;
+          border-radius: 50%;
+          background: var(--circle-bg, #1A1A1A);
+      }
+
+      [x-cloak] { display: none !important; }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #8B5FBF; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: #5D5CDE; }
+
+      /* Task Card styles */
+      .task-card {
+          transition: all 0.2s ease;
+          cursor: pointer;
+      }
+      .task-card:hover {
+          transform: translateY(-3px);
+          box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+      }
+
+      /* Progress Bar */
+      .progress-bar {
+          height: 8px;
+          border-radius: 4px;
+          background: #e2e8f0;
+          overflow: hidden;
+      }
+      .progress-value {
+          height: 100%;
+          border-radius: 4px;
+          background: linear-gradient(to right, #5D5CDE, #8B5FBF);
+          transition: width 0.5s ease;
+      }
+    </style>
+  </head>
+
+  <body
+    class="bg-base-200 dark:bg-dark-base-100 text-gray-800 dark:text-gray-200"
+    x-data="ashvalOS()"
+    x-init="init()"
+    :class="{ 'dark': isDark }"
+    x-cloak
+  >
+    <div class="flex h-screen">
+      <!-- Sidebar -->
+      <aside
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+        class="fixed lg:static lg:translate-x-0 z-50 w-64 h-full glass flex-shrink-0 transition-transform duration-300 ease-in-out"
+      >
+        <div class="flex flex-col h-full">
+          <div class="p-4 flex items-center space-x-3 border-b border-white/10">
+            <div
+              class="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg"
+            >
+              <i class="fas fa-brain text-white"></i>
+            </div>
+            <div>
+              <h1
+                class="text-lg font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent"
+              >
+                Ashval OS
+              </h1>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                AI Business Control
+              </p>
+            </div>
+          </div>
+
+          <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+            <template x-for="(item, index) in navItems" :key="index">
+              <button
+                @click="currentView = item.id; sidebarOpen = false"
+                :class="currentView === item.id ? 'bg-primary text-white shadow-md' : 'hover:bg-primary/10'"
+                class="w-full text-left px-3 py-2.5 rounded-lg transition-all duration-200 flex items-center"
+              >
+                <i :class="item.icon" class="w-6 text-center mr-3"></i>
+                <span x-text="item.label"></span>
+                <span
+                  x-show="item.count"
+                  x-text="item.count()"
+                  class="ml-auto bg-primary/20 text-primary px-2 py-0.5 rounded-full text-xs font-semibold"
+                ></span>
+              </button>
+            </template>
+          </nav>
+
+          <div class="p-4 border-t border-white/10">
+            <button
+              @click="currentView = 'settings'; sidebarOpen = false"
+              class="w-full text-left px-3 py-2 rounded-lg hover:bg-primary/10 transition-colors flex items-center"
+            >
+              <i class="fas fa-cog w-6 text-center mr-3"></i>
+              <span>ตั้งค่า</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <div class="flex-1 flex flex-col h-screen overflow-y-auto">
+        <header
+          class="sticky top-0 z-40 glass p-4 flex items-center justify-between"
+        >
+          <div class="flex items-center space-x-4">
+            <button
+              @click="sidebarOpen = !sidebarOpen"
+              class="lg:hidden p-2 rounded-lg hover:bg-primary/10"
+            >
+              <i class="fas fa-bars"></i>
+            </button>
+            <h2 class="text-xl font-bold" x-text="getCurrentViewTitle()"></h2>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button
+              @click="showQuickAddModal = true"
+              class="btn-3d bg-success text-white px-3 py-2 rounded-lg flex items-center"
+            >
+              <i class="fas fa-plus mr-1"></i>
+              <span class="hidden sm:inline">เพิ่มด่วน</span>
+            </button>
+            <button
+              @click="toggleDarkMode()"
+              class="btn-3d bg-gray-700 dark:bg-dark-base-300 text-white p-2.5 rounded-lg"
+            >
+              <i
+                :class="isDark ? 'fas fa-sun text-yellow-400' : 'fas fa-moon'"
+              ></i>
+            </button>
+          </div>
+        </header>
+
+        <main class="flex-1 p-6 space-y-6 overflow-auto">
+          <!-- Dashboard View -->
+          <div x-show="currentView === 'dashboard'">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-6">
+              <div class="glass rounded-xl p-5 text-center">
+                <i class="fas fa-tasks text-primary text-3xl mb-2"></i>
+                <p class="text-2xl font-bold" x-text="tasks.length"></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  งานทั้งหมด
+                </p>
+              </div>
+              <div class="glass rounded-xl p-5 text-center">
+                <i class="fas fa-check-circle text-success text-3xl mb-2"></i>
+                <p
+                  class="text-2xl font-bold"
+                  x-text="tasks.filter(t => t.status === 'done').length"
+                ></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  งานที่เสร็จแล้ว
+                </p>
+              </div>
+              <div class="glass rounded-xl p-5 text-center">
+                <i
+                  class="fas fa-project-diagram text-secondary text-3xl mb-2"
+                ></i>
+                <p
+                  class="text-2xl font-bold"
+                  x-text="Object.keys(projects).length"
+                ></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                  โปรเจกต์ที่ใช้งาน
+                </p>
+              </div>
+              <div class="glass rounded-xl p-5 text-center">
+                <i class="far fa-lightbulb text-accent text-3xl mb-2"></i>
+                <p class="text-2xl font-bold" x-text="ideas.length"></p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">ไอเดีย</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="glass rounded-xl p-6">
+                <h3 class="font-semibold mb-4">ความคืบหน้าโปรเจกต์</h3>
+                <div class="space-y-4">
+                  <template x-for="(project, code) in projects" :key="code">
+                    <div class="space-y-2">
+                      <div class="flex justify-between items-center">
+                        <span class="font-medium" x-text="project.name"></span>
+                        <span
+                          class="text-sm"
+                          x-text="project.progress + '%'"
+                        ></span>
+                      </div>
+                      <div class="progress-bar">
+                        <div
+                          class="progress-value"
+                          :style="`width: ${project.progress}%`"
+                        ></div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <div class="glass rounded-xl p-6">
+                <h3 class="font-semibold mb-4">ประเภทงาน</h3>
+                <div class="fitness-chart">
+                  <div
+                    class="fitness-circle"
+                    style="transform: rotate(0deg); background: #4ADE80;"
+                  >
+                    <div class="fitness-circle-inner"></div>
+                  </div>
+                  <div
+                    class="fitness-circle"
+                    style="transform: rotate(120deg); background: #FBBF24;"
+                  >
+                    <div class="fitness-circle-inner"></div>
+                  </div>
+                  <div
+                    class="fitness-circle"
+                    style="transform: rotate(240deg); background: #EF4444;"
+                  >
+                    <div class="fitness-circle-inner"></div>
+                  </div>
+                </div>
+                <div class="flex justify-center mt-5 space-x-4">
+                  <div class="flex items-center">
+                    <div class="w-3 h-3 rounded-full bg-success mr-2"></div>
+                    <span class="text-sm">การพัฒนา</span>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="w-3 h-3 rounded-full bg-warning mr-2"></div>
+                    <span class="text-sm">คอนเทนต์</span>
+                  </div>
+                  <div class="flex items-center">
+                    <div class="w-3 h-3 rounded-full bg-error mr-2"></div>
+                    <span class="text-sm">อื่นๆ</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Tasks -->
+            <div class="glass rounded-xl p-6 mt-6">
+              <h3 class="font-semibold mb-4">งานล่าสุด</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                      <th class="text-left py-3 px-2">ชื่องาน</th>
+                      <th class="text-left py-3 px-2">โปรเจกต์</th>
+                      <th class="text-left py-3 px-2">ความสำคัญ</th>
+                      <th class="text-left py-3 px-2">สถานะ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template
+                      x-for="(task, index) in tasks.slice(0, 5)"
+                      :key="index"
+                    >
+                      <tr
+                        class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-dark-base-200"
+                      >
+                        <td class="py-3 px-2" x-text="task.title"></td>
+                        <td class="py-3 px-2">
+                          <span
+                            class="px-2 py-1 rounded-full text-xs bg-secondary/10 text-secondary"
+                            x-text="task.project"
+                          ></span>
+                        </td>
+                        <td class="py-3 px-2">
+                          <span
+                            class="px-2 py-1 rounded-full text-xs"
+                            :class="getPriorityClass(task.priority)"
+                            x-text="task.priority"
+                          ></span>
+                        </td>
+                        <td class="py-3 px-2">
+                          <span
+                            class="px-2 py-1 rounded-full text-xs"
+                            :class="task.status === 'todo' ? 'bg-gray-200 text-gray-700' : task.status === 'doing' ? 'bg-warning/20 text-warning' : 'bg-success/20 text-success'"
+                            x-text="task.status === 'todo' ? 'รอทำ' : task.status === 'doing' ? 'กำลังทำ' : 'เสร็จแล้ว'"
+                          ></span>
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tasks View -->
+          <div x-show="currentView === 'tasks'">
+            <div class="flex justify-between items-center mb-6">
+              <div class="flex space-x-2">
+                <button
+                  @click="taskFilter = 'all'"
+                  :class="taskFilter === 'all' ? 'bg-primary text-white' : 'bg-base-100 dark:bg-dark-base-200'"
+                  class="px-4 py-2 rounded-lg shadow-sm"
+                >
+                  ทั้งหมด
+                </button>
+                <button
+                  @click="taskFilter = 'todo'"
+                  :class="taskFilter === 'todo' ? 'bg-primary text-white' : 'bg-base-100 dark:bg-dark-base-200'"
+                  class="px-4 py-2 rounded-lg shadow-sm"
+                >
+                  รอทำ
+                </button>
+                <button
+                  @click="taskFilter = 'doing'"
+                  :class="taskFilter === 'doing' ? 'bg-primary text-white' : 'bg-base-100 dark:bg-dark-base-200'"
+                  class="px-4 py-2 rounded-lg shadow-sm"
+                >
+                  กำลังทำ
+                </button>
+                <button
+                  @click="taskFilter = 'done'"
+                  :class="taskFilter === 'done' ? 'bg-primary text-white' : 'bg-base-100 dark:bg-dark-base-200'"
+                  class="px-4 py-2 rounded-lg shadow-sm"
+                >
+                  เสร็จแล้ว
+                </button>
+              </div>
+              <div class="relative">
+                <input
+                  type="text"
+                  x-model="taskSearch"
+                  placeholder="ค้นหางาน..."
+                  class="pl-10 pr-4 py-2 rounded-lg bg-base-100 dark:bg-dark-base-200 border-0 focus:ring-2 focus:ring-primary"
+                />
+                <i
+                  class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                ></i>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <template x-for="(task, index) in filteredTasks" :key="index">
+                <div
+                  class="glass p-4 rounded-xl task-card"
+                  @click="openTaskDetail(task)"
+                >
+                  <div class="flex justify-between items-start">
+                    <h3 class="font-medium" x-text="task.title"></h3>
+                    <span
+                      class="px-2 py-1 rounded-full text-xs"
+                      :class="getPriorityClass(task.priority)"
+                      x-text="task.priority"
+                    ></span>
+                  </div>
+                  <p
+                    class="text-sm text-gray-500 dark:text-gray-400 mt-2 mb-3"
+                    x-text="task.description"
+                  ></p>
+                  <div class="flex justify-between items-center">
+                    <span
+                      class="text-xs px-2 py-1 rounded-full bg-secondary/10 text-secondary"
+                      x-text="task.project"
+                    ></span>
+                    <span
+                      class="text-xs px-2 py-1 rounded-full"
+                      :class="task.status === 'todo' ? 'bg-gray-200 text-gray-700' : task.status === 'doing' ? 'bg-warning/20 text-warning' : 'bg-success/20 text-success'"
+                      x-text="task.status === 'todo' ? 'รอทำ' : task.status === 'doing' ? 'กำลังทำ' : 'เสร็จแล้ว'"
+                    ></span>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Projects View -->
+          <div x-show="currentView === 'projects'">
+            <div class="glass rounded-xl p-6 mb-6">
+              <h2 class="text-xl font-bold mb-4">เพิ่มโปรเจกต์ใหม่</h2>
+              <form @submit.prevent="addProject()" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1"
+                      >รหัสโปรเจกต์ (2 ตัวอักษร)</label
+                    >
+                    <input
+                      type="text"
+                      x-model="newProject.code"
+                      maxlength="2"
+                      class="w-full p-2 rounded-lg bg-base-100 dark:bg-dark-base-200 border-0 focus:ring-2 focus:ring-primary"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1"
+                      >ชื่อโปรเจกต์</label
+                    >
+                    <input
+                      type="text"
+                      x-model="newProject.name"
+                      class="w-full p-2 rounded-lg bg-base-100 dark:bg-dark-base-200 border-0 focus:ring-2 focus:ring-primary"
+                      required
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1"
+                    >รายละเอียด</label
+                  >
+                  <textarea
+                    x-model="newProject.description"
+                    rows="3"
+                    class="w-full p-2 rounded-lg bg-base-100 dark:bg-dark-base-200 border-0 focus:ring-2 focus:ring-primary"
+                  ></textarea>
+                </div>
+                <button
+                  type="submit"
+                  class="btn-3d bg-primary text-white px-4 py-2 rounded-lg"
+                >
+                  เพิ่มโปรเจกต์
+                </button>
+              </form>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <template x-for="(project, code) in projects" :key="code">
+                <div class="glass p-6 rounded-xl">
+                  <div class="flex justify-between items-start">
+                    <div>
+                      <h3
+                        class="font-semibold text-lg"
+                        x-text="project.name"
+                      ></h3>
+                      <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        รหัส: <span x-text="code"></span>
+                      </p>
+                    </div>
+                    <span
+                      class="text-sm px-2 py-1 rounded-full bg-secondary/10 text-secondary"
+                      x-text="project.progress + '%'"
+                    ></span>
+                  </div>
+                  <p class="text-sm mt-3 mb-4" x-text="project.description"></p>
+                  <div class="progress-bar">
+                    <div
+                      class="progress-value"
+                      :style="`width: ${project.progress}%`"
+                    ></div>
+                  </div>
+                  <div class="mt-4 flex justify-between items-center">
+                    <span class="text-xs text-gray-500 dark:text-gray-400"
+                      >งาน:
+                      <span
+                        x-text="tasks.filter(t => t.project === code).length"
+                      ></span
+                    ></span>
+                    <button
+                      @click="deleteProject(code)"
+                      class="text-error hover:text-opacity-80"
+                    >
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Ideas View -->
+          <div x-show="currentView === 'ideas'">
+            <div class="glass rounded-xl p-6 mb-6">
+              <h2 class="text-xl font-bold mb-4">เพิ่มไอเดียใหม่</h2>
+              <form @submit.prevent="addIdea()" class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-1"
+                    >ชื่อไอเดีย</label
+                  >
+                  <input
+                    type="text"
+                    x-model="newIdea.title"
+                    class="w-full p-2 rounded-lg bg-base-100 dark:bg-dark-base-200 border-0 focus:ring-2 focus:ring-primary"
+                    required
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1"
+                    >รายละเอียด</label
+                  >
+                  <textarea
+                    x-model="newIdea.description"
+                    rows="3"
+                    class="w-full p-2 rounded-lg bg-base-100 dark:bg-dark-base-200 border-0 focus:ring-2 focus:ring-primary"
+                    required
+                  ></textarea>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1">หมวดหมู่</label>
+                  <select
+                    x-model="newIdea.category"
+                    class="w-full p-2 rounded-lg bg-base-100 dark:bg-dark-base-200 border-0 focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="content">เนื้อหา/คอนเทนต์</option>
+                    <option value="product">สินค้า/บริการ</option>
+                    <option value="marketing">การตลาด</option>
+                    <option value="development">การพัฒนา</option>
+                    <option value="other">อื่นๆ</option>
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  class="btn-3d bg-accent text-white px-4 py-2 rounded-lg"
+                >
+                  บันทึกไอเดีย
+                </button>
+              </form>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <template x-for="(idea, index) in ideas" :key="index">
+                <div class="glass p-6 rounded-xl">
+                  <div class="flex justify-between items-start">
+                    <h3 class="font-semibold" x-text="idea.title"></h3>
+                    <span
+                      class="text-xs px-2 py-1 rounded-full bg-accent/10 text-accent"
+                      x-text="idea.category === 'content' ? 'เนื้อหา' : 
+                                                  idea.category === 'product' ? 'สินค้า' : 
+                                                  idea.category === 'marketing' ? 'การตลาด' : 
+                                                  idea.category === 'development' ? 'การพัฒนา' : 'อื่นๆ'"
+                    ></span>
+                  </div>
+                  <p
+                    class="text-sm text-gray-500 dark:text-gray-400 mt-3"
+                    x-text="idea.description"
+                  ></p>
+                  <div class="mt-4 flex justify-between items-center">
+                    <span
+                      class="text-xs text-gray-400"
+                      x-text="formatDate(idea.date)"
+                    ></span>
+                    <div class="flex space-x-2">
+                      <button
+                        @click="convertIdeaToTask(index)"
+                        class="text-primary hover:text-opacity-80"
+                        title="แปลงเป็นงาน"
+                      >
+                        <i class="fas fa-tasks"></i>
+                      </button>
+                      <button
+                        @click="deleteIdea(index)"
+                        class="text-error hover:text-opacity-80"
+                        title="ลบไอเดีย"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- AI Chat View -->
+          <div
+            x-show="currentView === 'ai_chat'"
+            class="h-[calc(100vh-10rem)] flex flex-col"
+          >
+            <div
+              class="flex-1 glass rounded-xl p-4 overflow-y-auto space-y-4"
+              id="chat-container"
+            >
+              <template x-for="(message, index) in chatMessages" :key="index">
+                <div
+                  class="flex"
+                  :class="message.sender === 'user' ? 'justify-end' : 'justify-start'"
+                >
+                  <div
+                    class="max-w-md p-3 rounded-lg"
+                    :class="message.sender === 'user' ? 'bg-primary text-white' : 'bg-base-100 dark:bg-dark-base-200'"
+                  >
+                    <p x-text="message.text"></p>
+                    <p
+                      class="text-xs mt-1 opacity-70"
+                      x-text="formatDateTime(message.timestamp)"
+                    ></p>
+                  </div>
+                </div>
+              </template>
+              <div x-show="aiLoading" class="flex justify-start">
+                <div
+                  class="max-w-md p-3 rounded-lg bg-base-100 dark:bg-dark-base-200 flex items-center space-x-2"
+                >
+                  <div
+                    class="w-2 h-2 bg-primary rounded-full animate-bounce"
+                    style="animation-delay: 0s;"
+                  ></div>
+                  <div
+                    class="w-2 h-2 bg-primary rounded-full animate-bounce"
+                    style="animation-delay: 0.1s;"
+                  ></div>
+                  <div
+                    class="w-2 h-2 bg-primary rounded-full animate-bounce"
+                    style="animation-delay: 0.2s;"
+                  ></div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <form @submit.prevent="sendChatMessage()" class="relative">
+                <input
+                  type="text"
+                  x-model="chatInput"
+                  placeholder="ถาม AI หรือสั่งงานที่นี่..."
+                  class="w-full pl-4 pr-12 py-3 rounded-lg bg-base-100 dark:bg-dark-base-200 border-2 border-transparent focus:border-primary focus:ring-0 transition"
+                />
+                <button
+                  type="submit"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-primary text-white hover:bg-opacity-80"
+                >
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Forms View -->
+          <div x-show="currentView === 'forms'" class="space-y-6">
+            <h2 class="text-2xl font-bold">ศูนย์รวมฟอร์ม (All-in-one)</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="glass rounded-xl p-6">
+                <h3 class="font-semibold text-lg mb-4 flex items-center">
+                  <i class="fas fa-bullseye mr-3 text-primary"></i
+                  >เป้าหมายประจำวัน (AI แตกงานย่อย)
+                </h3>
+                <form @submit.prevent="generateSubtasks()" class="space-y-3">
+                  <input
+                    type="text"
+                    x-model="subtaskForm.mainTask"
+                    placeholder="ชื่องานหลัก"
+                    required
+                    class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  />
+                  <select
+                    x-model="subtaskForm.project"
+                    class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  >
+                    <option value="">เลือกโปรเจกต์ (ไม่บังคับ)</option>
+                    <template x-for="(project, code) in projects" :key="code">
+                      <option :value="code" x-text="project.name"></option>
+                    </template>
+                  </select>
+                  <button
+                    type="submit"
+                    class="btn-3d bg-primary text-white w-full py-2 rounded-lg"
+                  >
+                    สร้างและแตกงาน
+                  </button>
+                </form>
+              </div>
+
+              <div class="glass rounded-xl p-6">
+                <h3 class="font-semibold text-lg mb-4 flex items-center">
+                  <i class="far fa-lightbulb mr-3 text-accent"></i
+                  >เพิ่มไอเดียใหม่
+                </h3>
+                <form @submit.prevent="quickAddIdea()" class="space-y-3">
+                  <input
+                    type="text"
+                    x-model="quickIdeaForm.title"
+                    placeholder="ชื่อไอเดีย"
+                    required
+                    class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  />
+                  <textarea
+                    x-model="quickIdeaForm.description"
+                    placeholder="รายละเอียด..."
+                    rows="3"
+                    class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  ></textarea>
+                  <select
+                    x-model="quickIdeaForm.category"
+                    class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  >
+                    <option value="content">เนื้อหา/คอนเทนต์</option>
+                    <option value="product">สินค้า/บริการ</option>
+                    <option value="marketing">การตลาด</option>
+                    <option value="development">การพัฒนา</option>
+                    <option value="other">อื่นๆ</option>
+                  </select>
+                  <button
+                    type="submit"
+                    class="btn-3d bg-accent text-white w-full py-2 rounded-lg"
+                  >
+                    บันทึกไอเดีย
+                  </button>
+                </form>
+              </div>
+
+              <div class="glass rounded-xl p-6">
+                <h3 class="font-semibold text-lg mb-4 flex items-center">
+                  <i class="fas fa-microphone-alt mr-3 text-secondary"></i
+                  >Script to Voice (TTS)
+                </h3>
+                <form @submit.prevent="generateTTS()" class="space-y-3">
+                  <textarea
+                    x-model="ttsForm.script"
+                    placeholder="ใส่สคริปต์ที่นี่..."
+                    rows="3"
+                    required
+                    class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  ></textarea>
+                  <select
+                    x-model="ttsForm.voice"
+                    required
+                    class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  >
+                    <option value="A">ผู้หญิง (Google AI Studio)</option>
+                    <option value="Leda">ผู้หญิง (Leda)</option>
+                  </select>
+                  <button
+                    type="submit"
+                    class="btn-3d bg-secondary text-white w-full py-2 rounded-lg"
+                  >
+                    สร้างไฟล์เสียง
+                  </button>
+                </form>
+              </div>
+
+              <div class="glass rounded-xl p-6">
+                <h3 class="font-semibold text-lg mb-4 flex items-center">
+                  <i class="fab fa-youtube mr-3 text-red-500"></i>วิเคราะห์ช่อง
+                  YouTube
+                </h3>
+                <form @submit.prevent="analyzeYouTube()" class="space-y-3">
+                  <input
+                    type="text"
+                    x-model="youtubeForm.channelUrl"
+                    placeholder="URL ช่อง YouTube"
+                    required
+                    class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  />
+                  <button
+                    type="submit"
+                    class="btn-3d bg-red-500 text-white w-full py-2 rounded-lg"
+                  >
+                    เริ่มวิเคราะห์
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Airtable Integration View -->
+          <div x-show="currentView === 'airtable'" class="space-y-6">
+            <h2 class="text-2xl font-bold">เชื่อมต่อกับ Airtable</h2>
+
+            <div class="glass rounded-xl p-6">
+              <h3 class="font-semibold text-lg mb-4">สถานะการเชื่อมต่อ</h3>
+              <div class="flex items-center space-x-3">
+                <div
+                  class="w-3 h-3 rounded-full"
+                  :class="airtableConnected ? 'bg-success' : 'bg-error'"
+                ></div>
+                <span
+                  x-text="airtableConnected ? 'เชื่อมต่อแล้ว' : 'ยังไม่ได้เชื่อมต่อ'"
+                ></span>
+              </div>
+
+              <div class="mt-6" x-show="!airtableConnected">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                  กรุณากรอก API Key และ Base ID เพื่อเชื่อมต่อกับ Airtable
+                </p>
+                <form @submit.prevent="connectAirtable()" class="space-y-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1"
+                      >Airtable API Key</label
+                    >
+                    <input
+                      type="password"
+                      x-model="airtableConfig.apiKey"
+                      class="w-full p-2 rounded-lg bg-base-100 dark:bg-dark-base-200 border-0 focus:ring-2 focus:ring-primary"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1"
+                      >Airtable Base ID</label
+                    >
+                    <input
+                      type="text"
+                      x-model="airtableConfig.baseId"
+                      class="w-full p-2 rounded-lg bg-base-100 dark:bg-dark-base-200 border-0 focus:ring-2 focus:ring-primary"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    class="btn-3d bg-primary text-white px-4 py-2 rounded-lg"
+                  >
+                    เชื่อมต่อ
+                  </button>
+                </form>
+              </div>
+
+              <div class="mt-6" x-show="airtableConnected">
+                <h4 class="font-medium mb-3">ข้อมูลที่เชื่อมต่อ</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="bg-base-100 dark:bg-dark-base-200 rounded-lg p-4">
+                    <h5 class="font-medium text-sm mb-2">งานและโปรเจกต์</h5>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      งานทั้งหมด: <span x-text="tasks.length"></span> รายการ
+                    </p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      โปรเจกต์ทั้งหมด:
+                      <span x-text="Object.keys(projects).length"></span>
+                      โปรเจกต์
+                    </p>
+                  </div>
+                  <div class="bg-base-100 dark:bg-dark-base-200 rounded-lg p-4">
+                    <h5 class="font-medium text-sm mb-2">ไอเดีย</h5>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      ไอเดียทั้งหมด: <span x-text="ideas.length"></span> รายการ
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex space-x-3 mt-6">
+                  <button
+                    @click="syncToAirtable()"
+                    class="btn-3d bg-success text-white px-4 py-2 rounded-lg"
+                  >
+                    ซิงค์ข้อมูลไปยัง Airtable
+                  </button>
+                  <button
+                    @click="syncFromAirtable()"
+                    class="btn-3d bg-secondary text-white px-4 py-2 rounded-lg"
+                  >
+                    ดึงข้อมูลจาก Airtable
+                  </button>
+                  <button
+                    @click="disconnectAirtable()"
+                    class="btn-3d bg-error text-white px-4 py-2 rounded-lg"
+                  >
+                    ยกเลิกการเชื่อมต่อ
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="glass rounded-xl p-6">
+              <h3 class="font-semibold text-lg mb-4">
+                วิธีใช้งาน Airtable Integration
+              </h3>
+              <div class="text-sm space-y-3">
+                <p>1. สร้าง Base ใน Airtable ที่มีตารางดังนี้:</p>
+                <ul class="list-disc pl-5 space-y-1">
+                  <li>
+                    <b>Tasks</b> - ตารางสำหรับเก็บงาน (ฟิลด์: id, title,
+                    description, status, priority, project, type, created_at)
+                  </li>
+                  <li>
+                    <b>Projects</b> - ตารางสำหรับเก็บโปรเจกต์ (ฟิลด์: code,
+                    name, description, progress)
+                  </li>
+                  <li>
+                    <b>Ideas</b> - ตารางสำหรับเก็บไอเดีย (ฟิลด์: title,
+                    description, category, date)
+                  </li>
+                </ul>
+                <p>
+                  2. คัดลอก API Key จากหน้า
+                  <a
+                    href="https://airtable.com/account"
+                    target="_blank"
+                    class="text-primary hover:underline"
+                    >Account Settings</a
+                  >
+                  ของ Airtable
+                </p>
+                <p>
+                  3. คัดลอก Base ID จาก URL ของ Base ของคุณ
+                  (airtable.com/<b>appXXXXXXXXXXXXXX</b>/tblYYYYYYY)
+                </p>
+                <p>4. กรอกข้อมูลด้านบนและกดเชื่อมต่อ</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings View -->
+          <div x-show="currentView === 'settings'" class="space-y-6">
+            <h2 class="text-2xl font-bold">ตั้งค่าระบบและ API</h2>
+            <div class="glass rounded-xl p-6">
+              <h3 class="font-semibold text-lg mb-4">API Keys</h3>
+              <p class="text-sm text-gray-500 mb-4">
+                ข้อมูล API จะถูกบันทึกไว้ในเบราว์เซอร์ของคุณเท่านั้น
+                ไม่ได้ส่งไปที่เซิร์ฟเวอร์อื่น
+              </p>
+              <form @submit.prevent="saveApiKeys()" class="space-y-4">
+                <div>
+                  <label class="font-medium">Airtable API Key</label>
+                  <input
+                    type="password"
+                    x-model="apiKeys.airtableToken"
+                    class="w-full mt-1 bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  />
+                </div>
+                <div>
+                  <label class="font-medium">Airtable Base ID</label>
+                  <input
+                    type="text"
+                    x-model="apiKeys.airtableBaseId"
+                    class="w-full mt-1 bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  />
+                </div>
+                <div>
+                  <label class="font-medium">Google Gemini API Key</label>
+                  <input
+                    type="password"
+                    x-model="apiKeys.geminiKey"
+                    class="w-full mt-1 bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  />
+                </div>
+                <div>
+                  <label class="font-medium">Google TTS API Key</label>
+                  <input
+                    type="password"
+                    x-model="apiKeys.ttsKey"
+                    class="w-full mt-1 bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  />
+                </div>
+                <div>
+                  <label class="font-medium">YouTube Data API Key</label>
+                  <input
+                    type="password"
+                    x-model="apiKeys.youtubeKey"
+                    class="w-full mt-1 bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  class="btn-3d bg-primary text-white px-6 py-2 rounded-lg"
+                >
+                  บันทึก
+                </button>
+              </form>
+            </div>
+
+            <div class="glass rounded-xl p-6">
+              <h3 class="font-semibold text-lg mb-4">การตั้งค่าอื่นๆ</h3>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="font-medium">โหมดมืด</h4>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      เปลี่ยนธีมเป็นโหมดมืด
+                    </p>
+                  </div>
+                  <label
+                    class="relative inline-flex items-center cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      x-model="isDark"
+                      class="sr-only peer"
+                    />
+                    <div
+                      class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"
+                    ></div>
+                  </label>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <div>
+                    <h4 class="font-medium">แจ้งเตือน</h4>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      เปิดการแจ้งเตือนเมื่อมีการเปลี่ยนแปลง
+                    </p>
+                  </div>
+                  <label
+                    class="relative inline-flex items-center cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      x-model="notifications"
+                      class="sr-only peer"
+                    />
+                    <div
+                      class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"
+                    ></div>
+                  </label>
+                </div>
+
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    @click="exportData()"
+                    class="btn-3d bg-secondary text-white px-4 py-2 rounded-lg"
+                  >
+                    <i class="fas fa-download mr-2"></i>ส่งออกข้อมูล
+                  </button>
+                  <input
+                    type="file"
+                    id="importFile"
+                    class="hidden"
+                    @change="importData($event)"
+                  />
+                  <button
+                    @click="document.getElementById('importFile').click()"
+                    class="btn-3d bg-primary text-white px-4 py-2 rounded-lg ml-3"
+                  >
+                    <i class="fas fa-upload mr-2"></i>นำเข้าข้อมูล
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="glass rounded-xl p-6">
+              <h3 class="font-semibold text-lg mb-4">เกี่ยวกับ</h3>
+              <p class="text-sm mb-2">
+                Ashval Business OS - Complete AI Dashboard
+              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Version 1.0.0
+              </p>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                Made with ❤️ by Ashval Team
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Task Detail Modal -->
+    <div
+      x-show="taskDetailModal.show"
+      @click.away="taskDetailModal.show = false"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+    >
+      <div class="glass rounded-xl p-6 w-full max-w-2xl">
+        <h3
+          class="font-bold text-xl mb-4"
+          x-text="taskDetailModal.task.title"
+        ></h3>
+        <div class="space-y-4">
+          <div>
+            <label class="text-sm font-medium">รายละเอียด</label>
+            <p
+              class="mt-1 p-2 rounded-lg bg-base-100/50 dark:bg-dark-base-200/50"
+              x-text="taskDetailModal.task.description"
+            ></p>
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium">โปรเจกต์</label>
+              <p
+                class="mt-1 px-3 py-1 rounded-lg bg-secondary/10 text-secondary inline-block"
+                x-text="taskDetailModal.task.project"
+              ></p>
+            </div>
+            <div>
+              <label class="text-sm font-medium">ความสำคัญ</label>
+              <p
+                class="mt-1 px-3 py-1 rounded-lg inline-block"
+                :class="getPriorityClass(taskDetailModal.task.priority)"
+                x-text="taskDetailModal.task.priority"
+              ></p>
+            </div>
+          </div>
+          <div>
+            <label class="text-sm font-medium">สถานะ</label>
+            <select
+              x-model="taskDetailModal.task.status"
+              class="mt-1 w-full p-2 rounded-lg bg-base-100/50 dark:bg-dark-base-200/50 border-0 focus:ring-2 focus:ring-primary"
+            >
+              <option value="todo">รอทำ</option>
+              <option value="doing">กำลังทำ</option>
+              <option value="done">เสร็จแล้ว</option>
+            </select>
+          </div>
+          <div
+            class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700"
+          >
+            <button
+              @click="deleteTask(taskDetailModal.task.id)"
+              class="px-4 py-2 rounded-lg text-error hover:bg-error/10"
+            >
+              ลบงาน
+            </button>
+            <button
+              @click="taskDetailModal.show = false"
+              class="px-4 py-2 rounded-lg"
+            >
+              ปิด
+            </button>
+            <button
+              @click="updateTask(); taskDetailModal.show = false"
+              class="btn-3d bg-primary text-white px-4 py-2 rounded-lg"
+            >
+              บันทึกการเปลี่ยนแปลง
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Add Modal -->
+    <div
+      x-show="showQuickAddModal"
+      @click.away="showQuickAddModal = false"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+    >
+      <div class="glass rounded-xl p-6 w-full max-w-md">
+        <h3 class="font-bold text-xl mb-4">เพิ่มรายการด่วน</h3>
+        <form @submit.prevent="addTaskFromModal()" class="space-y-3">
+          <input
+            type="text"
+            x-model="quickAdd.title"
+            placeholder="ชื่องาน..."
+            required
+            class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+          />
+          <textarea
+            x-model="quickAdd.description"
+            placeholder="รายละเอียด..."
+            rows="2"
+            class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+          ></textarea>
+          <select
+            x-model="quickAdd.project"
+            class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+          >
+            <option value="">เลือกโปรเจกต์ (ไม่บังคับ)</option>
+            <template x-for="(project, code) in projects" :key="code">
+              <option :value="code" x-text="project.name"></option>
+            </template>
+          </select>
+          <select
+            x-model="quickAdd.priority"
+            class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+          >
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+          <div class="flex justify-end space-x-3">
+            <button
+              type="button"
+              @click="showQuickAddModal = false"
+              class="px-4 py-2 rounded-lg"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="submit"
+              class="btn-3d bg-success text-white px-4 py-2 rounded-lg"
+            >
+              เพิ่มงาน
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Subtasks Modal -->
+    <div
+      x-show="subtasksModal.show"
+      @click.away="subtasksModal.show = false"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+    >
+      <div class="glass rounded-xl p-6 w-full max-w-lg">
+        <h3
+          class="font-bold text-xl mb-4"
+          x-text="'งานย่อยสำหรับ: ' + subtasksModal.mainTask"
+        ></h3>
+        <div class="space-y-4">
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            AI ได้แตกงานย่อยให้คุณแล้ว สามารถแก้ไขหรือเพิ่มเติมได้ก่อนบันทึก
+          </p>
+          <div class="space-y-2">
+            <template
+              x-for="(subtask, index) in subtasksModal.subtasks"
+              :key="index"
+            >
+              <div class="flex items-center space-x-2">
+                <input
+                  type="text"
+                  x-model="subtasksModal.subtasks[index]"
+                  class="w-full bg-base-100/50 dark:bg-dark-base-200/50 rounded-lg p-2"
+                />
+                <button
+                  @click="subtasksModal.subtasks.splice(index, 1)"
+                  class="text-error hover:text-opacity-80"
+                >
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </template>
+          </div>
+          <button
+            @click="subtasksModal.subtasks.push('')"
+            class="text-primary hover:text-opacity-80"
+          >
+            <i class="fas fa-plus mr-1"></i> เพิ่มงานย่อย
+          </button>
+          <div
+            class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700"
+          >
+            <button
+              @click="subtasksModal.show = false"
+              class="px-4 py-2 rounded-lg"
+            >
+              ยกเลิก
+            </button>
+            <button
+              @click="saveSubtasks()"
+              class="btn-3d bg-primary text-white px-4 py-2 rounded-lg"
+            >
+              บันทึกงานย่อย
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification -->
+    <div
+      x-show="notification.show"
+      x-transition:enter="transition ease-out duration-300"
+      x-transition:enter-start="translate-y-full opacity-0"
+      x-transition:enter-end="translate-y-0 opacity-100"
+      x-transition:leave="transition ease-in duration-300"
+      x-transition:leave-start="translate-y-0 opacity-100"
+      x-transition:leave-end="translate-y-full opacity-0"
+      class="fixed bottom-5 right-5 z-50 p-4 rounded-lg shadow-xl text-white"
+      :class="{ 'bg-success': notification.type === 'success', 'bg-error': notification.type === 'error' }"
+    >
+      <p x-text="notification.message"></p>
+    </div>
+
+    <script>
+      // Safe localStorage
+      function safeStorage() {
+          const memory = {};
+          const isLocalStorageAvailable = (function() {
+              try {
+                  localStorage.setItem('test', 'test');
+                  localStorage.removeItem('test');
+                  return true;
+              } catch (e) {
+                  return false;
+              }
+          })();
+
+          return {
+              getItem: function(key) {
+                  if (isLocalStorageAvailable) {
+                      return localStorage.getItem(key);
+                  }
+                  return memory[key] || null;
+              },
+              setItem: function(key, value) {
+                  if (isLocalStorageAvailable) {
+                      localStorage.setItem(key, value);
+                  } else {
+                      memory[key] = value;
+                  }
+              },
+              removeItem: function(key) {
+                  if (isLocalStorageAvailable) {
+                      localStorage.removeItem(key);
+                  } else {
+                      delete memory[key];
+                  }
+              }
+          };
+      }
+
+      function ashvalOS() {
+          const storage = safeStorage();
+
+          return {
+              // State
+              sidebarOpen: false,
+              isDark: false,
+              notifications: true,
+              currentView: 'dashboard',
+              apiKeys: {
+                  airtableToken: '',
+                  airtableBaseId: '',
+                  geminiKey: '',
+                  ttsKey: '',
+                  youtubeKey: ''
+              },
+              notification: { show: false, message: '', type: 'success' },
+              aiLoading: false,
+              showQuickAddModal: false,
+              taskFilter: 'all',
+              taskSearch: '',
+              airtableConnected: false,
+
+              // Data
+              tasks: [],
+              projects: {},
+              ideas: [],
+              chatMessages: [],
+              chatInput: '',
+
+              // Forms
+              quickAdd: { title: '', description: '', project: '', priority: 'Medium' },
+              newProject: { code: '', name: '', description: '' },
+              newIdea: { title: '', description: '', category: 'content' },
+              subtaskForm: { mainTask: '', project: '' },
+              quickIdeaForm: { title: '', description: '', category: 'content' },
+              ttsForm: { script: '', voice: 'A' },
+              youtubeForm: { channelUrl: '' },
+              airtableConfig: { apiKey: '', baseId: '' },
+
+              // Modals
+              taskDetailModal: {
+                  show: false,
+                  task: { id: 0, title: '', description: '', status: '', priority: '', project: '' }
+              },
+              subtasksModal: {
+                  show: false,
+                  mainTask: '',
+                  project: '',
+                  subtasks: []
+              },
+
+              // Config
+              navItems: [
+                  { id: 'dashboard', label: 'Dashboard', icon: 'fas fa-chart-pie' },
+                  { id: 'tasks', label: 'งานทั้งหมด', icon: 'fas fa-tasks', count: function() { return this.tasks.length; } },
+                  { id: 'projects', label: 'โปรเจกต์', icon: 'fas fa-project-diagram' },
+                  { id: 'ideas', label: 'ไอเดีย', icon: 'far fa-lightbulb', count: function() { return this.ideas.length; } },
+                  { id: 'ai_chat', label: 'AI Chat', icon: 'fas fa-robot' },
+                  { id: 'forms', label: 'ศูนย์รวมฟอร์ม', icon: 'fab fa-wpforms' },
+                  { id: 'airtable', label: 'Airtable', icon: 'fas fa-database' }
+              ],
+
+              // Computed Properties
+              get filteredTasks() {
+                  let filtered = this.tasks;
+
+                  // Filter by status
+                  if (this.taskFilter !== 'all') {
+                      filtered = filtered.filter(task => task.status === this.taskFilter);
+                  }
+
+                  // Search by title or description
+                  if (this.taskSearch.trim() !== '') {
+                      const search = this.taskSearch.toLowerCase();
+                      filtered = filtered.filter(task =>
+                          task.title.toLowerCase().includes(search) ||
+                          task.description.toLowerCase().includes(search)
+                      );
+                  }
+
+                  return filtered;
+              },
+
+              // Methods
+              init() {
+                  // Load settings from localStorage
+                  this.isDark = storage.getItem('isDark') === 'true';
+                  this.notifications = storage.getItem('notifications') !== 'false';
+
+                  // Load API keys
+                  const savedApiKeys = storage.getItem('apiKeys');
+                  if (savedApiKeys) {
+                      try {
+                          this.apiKeys = JSON.parse(savedApiKeys);
+                      } catch (e) {
+                          console.error('Error parsing API keys', e);
+                      }
+                  }
+
+                  // Load data
+                  this.loadData();
+
+                  // Initial chat message
+                  if (this.chatMessages.length === 0) {
+                      this.chatMessages = [
+                          { id: 1, text: 'สวัสดี! ผมคือ AI ผู้ช่วยของคุณ มีอะไรให้รับใช้ครับ?', sender: 'ai', timestamp: Date.now() - 10000 }
+                      ];
+                  }
+
+                  // Scroll chat to bottom
+                  this.$watch('chatMessages.length', () => {
+                      this.scrollChatToBottom();
+                  });
+
+                  // Check Airtable connection
+                  this.checkAirtableConnection();
+              },
+
+              loadData() {
+                  // Load tasks
+                  const savedTasks = storage.getItem('tasks');
+                  if (savedTasks) {
+                      try {
+                          this.tasks = JSON.parse(savedTasks);
+                      } catch (e) {
+                          console.error('Error parsing tasks', e);
+                      }
+                  } else {
+                      // Sample data
+                      this.tasks = [
+                          { id: 1, title: 'เขียนโครงเรื่องนิยายบทที่ 5', description: 'วางโครงสร้างและเหตุการณ์สำคัญ', status: 'todo', priority: 'High', project: 'NV', type: 'content' },
+                          { id: 2, title: 'ออกแบบ Landing Page ใหม่', description: 'สำหรับโปรโมทนิยายเรื่องล่าสุด', status: 'todo', priority: 'Medium', project: 'WB', type: 'development' },
+                          { id: 3, title: 'อัดเสียง Podcast ตอนที่ 12', description: 'สัมภาษณ์นักเขียนรับเชิญ', status: 'doing', priority: 'High', project: 'PC', type: 'content' },
+                          { id: 4, title: 'วิเคราะห์ข้อมูล YouTube ประจำสัปดาห์', description: 'สรุปยอดวิวและหาแนวทางใหม่', status: 'doing', priority: 'Medium', project: 'YT', type: 'content' },
+                          { id: 5, title: 'ส่งอีเมลสรุปงานให้ทีม', description: 'สรุปความคืบหน้าของโปรเจกต์ Ashval', status: 'done', priority: 'Low', project: 'MK', type: 'other' },
+                          { id: 6, title: 'ปรับแก้โค้ด Business OS', description: 'เพิ่มฟีเจอร์ Mood Tracker', status: 'done', priority: 'High', project: 'WB', type: 'development' }
+                      ];
+                  }
+
+                  // Load projects
+                  const savedProjects = storage.getItem('projects');
+                  if (savedProjects) {
+                      try {
+                          this.projects = JSON.parse(savedProjects);
+                      } catch (e) {
+                          console.error('Error parsing projects', e);
+                      }
+                  } else {
+                      // Sample data
+                      this.projects = {
+                          'NV': { name: 'นิยาย Ashval', description: 'โปรเจกต์เขียนนิยายแฟนตาซีเรื่อง Ashval', progress: 75 },
+                          'WB': { name: 'เว็บแอป', description: 'พัฒนาเว็บแอปและแดชบอร์ด', progress: 60 },
+                          'PC': { name: 'Podcast', description: 'รายการ Podcast รายสัปดาห์', progress: 90 },
+                          'YT': { name: 'YouTube Channel', description: 'ช่อง YouTube และคอนเทนต์วิดีโอ', progress: 40 },
+                          'MK': { name: 'การตลาด', description: 'แคมเปญการตลาดและโปรโมชัน', progress: 25 }
+                      };
+                  }
+
+                  // Load ideas
+                  const savedIdeas = storage.getItem('ideas');
+                  if (savedIdeas) {
+                      try {
+                          this.ideas = JSON.parse(savedIdeas);
+                      } catch (e) {
+                          console.error('Error parsing ideas', e);
+                      }
+                  } else {
+                      // Sample data
+                      this.ideas = [
+                          { title: 'ระบบ AI สำหรับสร้างตัวละคร', description: 'พัฒนา AI ที่สามารถสร้างตัวละครสำหรับนิยายได้อย่างรวดเร็ว', category: 'development', date: Date.now() - 604800000 },
+                          { title: 'Podcast คุยกับนักเขียนดัง', description: 'จัดรายการ Podcast ที่เชิญนักเขียนดังมาแชร์ประสบการณ์', category: 'content', date: Date.now() - 259200000 },
+                          { title: 'หลักสูตรออนไลน์การเขียนนิยาย', description: 'สร้างคอร์สสอนการเขียนนิยายแฟนตาซีออนไลน์', category: 'product', date: Date.now() - 86400000 }
+                      ];
+                  }
+
+                  // Load chat history
+                  const savedChat = storage.getItem('chatMessages');
+                  if (savedChat) {
+                      try {
+                          this.chatMessages = JSON.parse(savedChat);
+                      } catch (e) {
+                          console.error('Error parsing chat messages', e);
+                      }
+                  }
+              },
+
+              saveData() {
+                  storage.setItem('tasks', JSON.stringify(this.tasks));
+                  storage.setItem('projects', JSON.stringify(this.projects));
+                  storage.setItem('ideas', JSON.stringify(this.ideas));
+                  storage.setItem('chatMessages', JSON.stringify(this.chatMessages));
+                  storage.setItem('isDark', this.isDark);
+                  storage.setItem('notifications', this.notifications);
+              },
+
+              toggleDarkMode() {
+                  this.isDark = !this.isDark;
+                  storage.setItem('isDark', this.isDark);
+              },
+
+              saveApiKeys() {
+                  storage.setItem('apiKeys', JSON.stringify(this.apiKeys));
+                  this.showNotification('บันทึก API Keys เรียบร้อยแล้ว');
+
+                  // Update Airtable config
+                  this.airtableConfig.apiKey = this.apiKeys.airtableToken;
+                  this.airtableConfig.baseId = this.apiKeys.airtableBaseId;
+
+                  // Check connection
+                  this.checkAirtableConnection();
+              },
+
+              getCurrentViewTitle() {
+                  const view = this.navItems.find(item => item.id === this.currentView);
+                  return view ? view.label : (this.currentView === 'settings' ? 'ตั้งค่า' : 'Dashboard');
+              },
+
+              getPriorityClass(priority) {
+                  switch (priority) {
+                      case 'High': return 'bg-error/20 text-error';
+                      case 'Medium': return 'bg-warning/20 text-warning';
+                      case 'Low': return 'bg-success/20 text-success';
+                      default: return 'bg-gray-200 text-gray-800';
+                  }
+              },
+
+              showNotification(message, type = 'success', duration = 3000) {
+                  if (!this.notifications && type !== 'error') return;
+
+                  this.notification.message = message;
+                  this.notification.type = type;
+                  this.notification.show = true;
+
+                  setTimeout(() => {
+                      this.notification.show = false;
+                  }, duration);
+              },
+
+              formatDate(timestamp) {
+                  const date = new Date(timestamp);
+                  return date.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+              },
+
+              formatDateTime(timestamp) {
+                  const date = new Date(timestamp);
+                  return date.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+              },
+
+              scrollChatToBottom() {
+                  setTimeout(() => {
+                      const container = document.getElementById('chat-container');
+                      if (container) {
+                          container.scrollTop = container.scrollHeight;
+                      }
+                  }, 100);
+              },
+
+              // Tasks
+              addTaskFromModal() {
+                  if (!this.quickAdd.title.trim()) return;
+
+                  const newId = this.tasks.length > 0 ? Math.max(...this.tasks.map(t => t.id)) + 1 : 1;
+
+                  this.tasks.unshift({
+                      id: newId,
+                      title: this.quickAdd.title,
+                      description: this.quickAdd.description,
+                      status: 'todo',
+                      priority: this.quickAdd.priority,
+                      project: this.quickAdd.project || '',
+                      type: 'other'
+                  });
+
+                  this.saveData();
+                  this.showNotification(`เพิ่มงาน "${this.quickAdd.title}" สำเร็จ`);
+                  this.quickAdd = { title: '', description: '', project: '', priority: 'Medium' };
+                  this.showQuickAddModal = false;
+
+                  // Update project progress
+                  this.updateProjectProgress();
+              },
+
+              openTaskDetail(task) {
+                  this.taskDetailModal.task = { ...task };
+                  this.taskDetailModal.show = true;
+              },
+
+              updateTask() {
+                  const index = this.tasks.findIndex(t => t.id === this.taskDetailModal.task.id);
+                  if (index !== -1) {
+                      this.tasks[index] = { ...this.taskDetailModal.task };
+                      this.saveData();
+                      this.showNotification('อัปเดตงานเรียบร้อยแล้ว');
+
+                      // Update project progress
+                      this.updateProjectProgress();
+                  }
+              },
+
+              deleteTask(id) {
+                  const index = this.tasks.findIndex(t => t.id === id);
+                  if (index !== -1) {
+                      const task = this.tasks[index];
+                      this.tasks.splice(index, 1);
+                      this.saveData();
+                      this.showNotification(`ลบงาน "${task.title}" แล้ว`);
+                      this.taskDetailModal.show = false;
+
+                      // Update project progress
+                      this.updateProjectProgress();
+                  }
+              },
+
+              // Projects
+              addProject() {
+                  if (!this.newProject.code || !this.newProject.name) return;
+
+                  // Convert to uppercase
+                  const code = this.newProject.code.toUpperCase();
+
+                  // Check if project code already exists
+                  if (this.projects[code]) {
+                      this.showNotification('รหัสโปรเจกต์นี้มีอยู่แล้ว กรุณาใช้รหัสอื่น', 'error');
+                      return;
+                  }
+
+                  this.projects[code] = {
+                      name: this.newProject.name,
+                      description: this.newProject.description,
+                      progress: 0
+                  };
+
+                  this.saveData();
+                  this.showNotification(`เพิ่มโปรเจกต์ "${this.newProject.name}" สำเร็จ`);
+                  this.newProject = { code: '', name: '', description: '' };
+              },
+
+              deleteProject(code) {
+                  if (confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบโปรเจกต์ "${this.projects[code].name}"?`)) {
+                      // Check if there are tasks using this project
+                      const tasksUsingProject = this.tasks.filter(t => t.project === code);
+                      if (tasksUsingProject.length > 0) {
+                          if (!confirm(`มี ${tasksUsingProject.length} งานที่เชื่อมโยงกับโปรเจกต์นี้ คุณต้องการลบโปรเจกต์นี้จริงๆ หรือไม่?`)) {
+                              return;
+                          }
+
+                          // Clear project from associated tasks
+                          this.tasks.forEach(task => {
+                              if (task.project === code) {
+                                  task.project = '';
+                              }
+                          });
+                      }
+
+                      delete this.projects[code];
+                      this.saveData();
+                      this.showNotification('ลบโปรเจกต์เรียบร้อยแล้ว');
+                  }
+              },
+
+              updateProjectProgress() {
+                  // Calculate progress for each project
+                  Object.keys(this.projects).forEach(code => {
+                      const projectTasks = this.tasks.filter(t => t.project === code);
+                      if (projectTasks.length > 0) {
+                          const doneTasks = projectTasks.filter(t => t.status === 'done').length;
+                          const progress = Math.round((doneTasks / projectTasks.length) * 100);
+                          this.projects[code].progress = progress;
+                      }
+                  });
+
+                  this.saveData();
+              },
+
+              // Ideas
+              addIdea() {
+                  if (!this.newIdea.title || !this.newIdea.description) return;
+
+                  this.ideas.unshift({
+                      title: this.newIdea.title,
+                      description: this.newIdea.description,
+                      category: this.newIdea.category,
+                      date: Date.now()
+                  });
+
+                  this.saveData();
+                  this.showNotification(`บันทึกไอเดีย "${this.newIdea.title}" สำเร็จ`);
+                  this.newIdea = { title: '', description: '', category: 'content' };
+              },
+
+              quickAddIdea() {
+                  if (!this.quickIdeaForm.title) return;
+
+                  this.ideas.unshift({
+                      title: this.quickIdeaForm.title,
+                      description: this.quickIdeaForm.description,
+                      category: this.quickIdeaForm.category,
+                      date: Date.now()
+                  });
+
+                  this.saveData();
+                  this.showNotification(`บันทึกไอเดีย "${this.quickIdeaForm.title}" สำเร็จ`);
+                  this.quickIdeaForm = { title: '', description: '', category: 'content' };
+              },
+
+              deleteIdea(index) {
+                  if (index >= 0 && index < this.ideas.length) {
+                      const idea = this.ideas[index];
+                      this.ideas.splice(index, 1);
+                      this.saveData();
+                      this.showNotification(`ลบไอเดีย "${idea.title}" แล้ว`);
+                  }
+              },
+
+              convertIdeaToTask(index) {
+                  if (index >= 0 && index < this.ideas.length) {
+                      const idea = this.ideas[index];
+
+                      // Create new task
+                      const newId = this.tasks.length > 0 ? Math.max(...this.tasks.map(t => t.id)) + 1 : 1;
+                      this.tasks.unshift({
+                          id: newId,
+                          title: idea.title,
+                          description: idea.description,
+                          status: 'todo',
+                          priority: 'Medium',
+                          project: '',
+                          type: idea.category === 'development' ? 'development' :
+                                idea.category === 'content' || idea.category === 'marketing' ? 'content' : 'other'
+                      });
+
+                      // Remove idea
+                      this.ideas.splice(index, 1);
+
+                      this.saveData();
+                      this.showNotification(`แปลงไอเดีย "${idea.title}" เป็นงานแล้ว`);
+                  }
+              },
+
+              // AI Chat
+              async sendChatMessage() {
+                  if (!this.chatInput.trim() || this.aiLoading) return;
+
+                  const userMessage = this.chatInput.trim();
+                  this.chatMessages.push({ id: Date.now(), text: userMessage, sender: 'user', timestamp: Date.now() });
+                  this.chatInput = '';
+                  this.aiLoading = true;
+
+                  // Simulate AI response
+                  setTimeout(() => {
+                      let response;
+
+                      // Simple rule-based responses
+                      if (userMessage.toLowerCase().includes('สวัสดี') || userMessage.toLowerCase().includes('hello')) {
+                          response = 'สวัสดีครับ! มีอะไรให้ช่วยไหมครับ?';
+                      } else if (userMessage.toLowerCase().includes('สร้างงาน') || userMessage.toLowerCase().includes('เพิ่มงาน')) {
+                          response = 'ต้องการสร้างงานใหม่ใช่ไหมครับ? คุณสามารถคลิกที่ปุ่ม "เพิ่มด่วน" ที่มุมบนขวา หรือไปที่หน้า "งานทั้งหมด" เพื่อจัดการงานได้ครับ';
+                      } else if (userMessage.toLowerCase().includes('โปรเจกต์')) {
+                          response = 'คุณสามารถจัดการโปรเจกต์ได้ที่เมนู "โปรเจกต์" ครับ สามารถเพิ่ม แก้ไข หรือลบโปรเจกต์ได้ตามต้องการ';
+                      } else if (userMessage.toLowerCase().includes('ไอเดีย') || userMessage.toLowerCase().includes('idea')) {
+                          response = 'ไอเดียใหม่ๆ เป็นสิ่งสำคัญครับ! คุณสามารถบันทึกไอเดียได้ที่เมนู "ไอเดีย" หรือใช้ฟอร์ม "เพิ่มไอเดียใหม่" ในหน้าศูนย์รวมฟอร์มครับ';
+                      } else if (userMessage.toLowerCase().includes('api') || userMessage.toLowerCase().includes('airtable')) {
+                          response = 'คุณสามารถตั้งค่า API Keys ได้ที่เมนู "ตั้งค่า" ครับ สำหรับการเชื่อมต่อกับ Airtable คุณสามารถจัดการได้ที่เมนู "Airtable" โดยเฉพาะเลยครับ';
+                      } else {
+                          response = `ขอบคุณสำหรับข้อความ "${userMessage}" ครับ ผมเป็น AI ผู้ช่วยของคุณ สามารถช่วยตอบคำถาม หรือช่วยจัดการงานต่างๆ ได้ครับ`;
+                      }
+
+                      this.chatMessages.push({ id: Date.now() + 1, text: response, sender: 'ai', timestamp: Date.now() });
+                      this.aiLoading = false;
+                      this.saveData();
+                  }, 1000);
+              },
+
+              // Forms
+              generateSubtasks() {
+                  if (!this.subtaskForm.mainTask) return;
+
+                  this.aiLoading = true;
+                  this.showNotification('กำลังแตกงานย่อยด้วย AI...', 'success');
+
+                  // Simulate AI task breakdown
+                  setTimeout(() => {
+                      const defaultSubtasks = [
+                          `วางแผนสำหรับ${this.subtaskForm.mainTask}`,
+                          `รวบรวมข้อมูลสำหรับ${this.subtaskForm.mainTask}`,
+                          `ดำเนินการ${this.subtaskForm.mainTask}`,
+                          `ตรวจสอบคุณภาพของ${this.subtaskForm.mainTask}`,
+                          `สรุปผล${this.subtaskForm.mainTask}`
+                      ];
+
+                      // Show subtasks modal
+                      this.subtasksModal.show = true;
+                      this.subtasksModal.mainTask = this.subtaskForm.mainTask;
+                      this.subtasksModal.project = this.subtaskForm.project;
+                      this.subtasksModal.subtasks = defaultSubtasks;
+
+                      this.aiLoading = false;
+                  }, 2000);
+              },
+
+              saveSubtasks() {
+                  if (this.subtasksModal.subtasks.length === 0) {
+                      this.showNotification('กรุณาระบุงานย่อยอย่างน้อย 1 รายการ', 'error');
+                      return;
+                  }
+
+                  // Create main task
+                  const mainTaskId = this.tasks.length > 0 ? Math.max(...this.tasks.map(t => t.id)) + 1 : 1;
+                  this.tasks.unshift({
+                      id: mainTaskId,
+                      title: this.subtasksModal.mainTask,
+                      description: `งานหลัก: มีงานย่อยทั้งหมด ${this.subtasksModal.subtasks.length} รายการ`,
+                      status: 'todo',
+                      priority: 'Medium',
+                      project: this.subtasksModal.project,
+                      type: 'other'
+                  });
+
+                  // Create subtasks
+                  let subtaskId = mainTaskId + 1;
+                  this.subtasksModal.subtasks.forEach(subtask => {
+                      if (subtask.trim()) {
+                          this.tasks.unshift({
+                              id: subtaskId++,
+                              title: subtask.trim(),
+                              description: `งานย่อยของ: ${this.subtasksModal.mainTask}`,
+                              status: 'todo',
+                              priority: 'Medium',
+                              project: this.subtasksModal.project,
+                              type: 'other'
+                          });
+                      }
+                  });
+
+                  this.saveData();
+                  this.showNotification(`สร้างงานหลักและงานย่อย ${this.subtasksModal.subtasks.length} รายการสำเร็จ`);
+                  this.subtaskForm = { mainTask: '', project: '' };
+                  this.subtasksModal.show = false;
+
+                  // Update project progress
+                  this.updateProjectProgress();
+              },
+
+              generateTTS() {
+                  if (!this.ttsForm.script || !this.ttsForm.voice) return;
+
+                  this.aiLoading = true;
+                  this.showNotification('กำลังสร้างไฟล์เสียง...', 'success');
+
+                  // Simulate TTS generation
+                  setTimeout(() => {
+                      this.showNotification(`สร้างไฟล์เสียงสำเร็จ! เสียงพากย์: ${this.ttsForm.voice === 'A' ? 'Google AI Studio' : 'Leda'}`, 'success');
+                      this.aiLoading = false;
+
+                      // Clear form
+                      this.ttsForm = { script: '', voice: 'A' };
+                  }, 3000);
+              },
+
+              analyzeYouTube() {
+                  if (!this.youtubeForm.channelUrl) return;
+
+                  this.aiLoading = true;
+                  this.showNotification('กำลังวิเคราะห์ช่อง YouTube...', 'success');
+
+                  // Simulate YouTube analysis
+                  setTimeout(() => {
+                      this.showNotification('วิเคราะห์ช่อง YouTube สำเร็จ! ผลการวิเคราะห์: ช่องนี้มีผู้ติดตาม 1.2M คน ยอดวิวเฉลี่ย 150K ต่อวิดีโอ', 'success');
+                      this.aiLoading = false;
+
+                      // Clear form
+                      this.youtubeForm = { channelUrl: '' };
+                  }, 3000);
+              },
+
+              // Airtable Integration
+              checkAirtableConnection() {
+                  // Check if we have Airtable API key and Base ID
+                  if (this.apiKeys.airtableToken && this.apiKeys.airtableBaseId) {
+                      this.airtableConfig.apiKey = this.apiKeys.airtableToken;
+                      this.airtableConfig.baseId = this.apiKeys.airtableBaseId;
+                      this.airtableConnected = true;
+                  } else {
+                      this.airtableConnected = false;
+                  }
+              },
+
+              connectAirtable() {
+                  if (!this.airtableConfig.apiKey || !this.airtableConfig.baseId) {
+                      this.showNotification('กรุณากรอก API Key และ Base ID', 'error');
+                      return;
+                  }
+
+                  this.aiLoading = true;
+                  this.showNotification('กำลังเชื่อมต่อกับ Airtable...', 'success');
+
+                  // Simulate connection
+                  setTimeout(() => {
+                      this.airtableConnected = true;
+                      this.aiLoading = false;
+
+                      // Update API keys
+                      this.apiKeys.airtableToken = this.airtableConfig.apiKey;
+                      this.apiKeys.airtableBaseId = this.airtableConfig.baseId;
+                      this.saveApiKeys();
+
+                      this.showNotification('เชื่อมต่อกับ Airtable สำเร็จ!', 'success');
+                  }, 2000);
+              },
+
+              disconnectAirtable() {
+                  this.airtableConnected = false;
+                  this.apiKeys.airtableToken = '';
+                  this.apiKeys.airtableBaseId = '';
+                  this.saveApiKeys();
+                  this.showNotification('ยกเลิกการเชื่อมต่อกับ Airtable แล้ว', 'success');
+              },
+
+              syncToAirtable() {
+                  if (!this.airtableConnected) {
+                      this.showNotification('กรุณาเชื่อมต่อกับ Airtable ก่อน', 'error');
+                      return;
+                  }
+
+                  this.aiLoading = true;
+                  this.showNotification('กำลังซิงค์ข้อมูลไปยัง Airtable...', 'success');
+
+                  // Simulate sync
+                  setTimeout(() => {
+                      this.aiLoading = false;
+                      this.showNotification('ซิงค์ข้อมูลไปยัง Airtable สำเร็จ!', 'success');
+                  }, 3000);
+              },
+
+              syncFromAirtable() {
+                  if (!this.airtableConnected) {
+                      this.showNotification('กรุณาเชื่อมต่อกับ Airtable ก่อน', 'error');
+                      return;
+                  }
+
+                  this.aiLoading = true;
+                  this.showNotification('กำลังดึงข้อมูลจาก Airtable...', 'success');
+
+                  // Simulate sync
+                  setTimeout(() => {
+                      this.aiLoading = false;
+                      this.showNotification('ดึงข้อมูลจาก Airtable สำเร็จ!', 'success');
+                  }, 3000);
+              },
+
+              // Data Export/Import
+              exportData() {
+                  const data = {
+                      tasks: this.tasks,
+                      projects: this.projects,
+                      ideas: this.ideas,
+                      chatMessages: this.chatMessages,
+                      apiKeys: this.apiKeys,
+                      version: '1.0.0'
+                  };
+
+                  const jsonData = JSON.stringify(data);
+                  const blob = new Blob([jsonData], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `ashval_os_backup_${new Date().toISOString().slice(0, 10)}.json`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+
+                  this.showNotification('ส่งออกข้อมูลสำเร็จ!', 'success');
+              },
+
+              importData(event) {
+                  const file = event.target.files[0];
+                  if (!file) return;
+
+                  const reader = new FileReader();
+                  reader.onload = (e) => {
+                      try {
+                          const data = JSON.parse(e.target.result);
+
+                          // Validate data structure
+                          if (!data.tasks || !data.projects || !data.ideas) {
+                              throw new Error('รูปแบบไฟล์ไม่ถูกต้อง');
+                          }
+
+                          // Import data
+                          this.tasks = data.tasks;
+                          this.projects = data.projects;
+                          this.ideas = data.ideas;
+
+                          // Optionally import chat and API keys
+                          if (data.chatMessages) this.chatMessages = data.chatMessages;
+                          if (data.apiKeys) this.apiKeys = data.apiKeys;
+
+                          this.saveData();
+                          this.saveApiKeys();
+                          this.showNotification('นำเข้าข้อมูลสำเร็จ!', 'success');
+
+                          // Check Airtable connection
+                          this.checkAirtableConnection();
+                      } catch (error) {
+                          this.showNotification('เกิดข้อผิดพลาดในการนำเข้าข้อมูล: ' + error.message, 'error');
+                      }
+                  };
+                  reader.readAsText(file);
+
+                  // Reset file input
+                  event.target.value = null;
+              }
+          };
+      }
+    </script>
+  </body>
+</html>
