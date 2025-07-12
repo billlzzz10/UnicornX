@@ -1,117 +1,159 @@
-# 🦄 UnicornX OS
-
-> บันทึกแนวคิด, โครงสร้าง, งาน และความคืบหน้าสำหรับทีม dev / content / creator by billlzzz10  
-> [🔗 UnicornX-OS Notion Dashboard (เฉพาะทีม)](https://www.notion.so/UnicornX-OS-2205e81a91ff8015a7a9db9a312771e9)
-
----
-
-## 🟦 สรุปเทคโนโลยีที่ใช้
-
-- **Frontend:** React, TypeScript, Vite
-- **Backend:** Node.js (Express)
-- **Database:** PostgreSQL
-- **Cloud & DevOps:** Google Cloud, Docker, GitHub Actions
-- **AI Integration:** GPT-4o, Gemini, Claude (ผ่าน custom runner class)
-- **Doc:** Notion, Markdown
+<div align="center">
+  <img src="https://raw.githubusercontent.com/billlzzz10/UnicornX/main/docs/assets/logo/UnicornX-logo-title-dark.png" width="340" alt="UnicornX Logo"/>
+  <br>
+  <h1 style="color:#7c44c2;">UnicornX Platform</h1>
+  <p style="color:#9E8AD7;font-size:1.2em;">
+    ศูนย์รวมแรงบันดาลใจ เทคโนโลยี นิยาย และงานสร้างสรรค์ของ billlzzz10
+  </p>
+  <img src="https://img.shields.io/github/languages/top/billlzzz10/UnicornX?style=for-the-badge&color=7c44c2">
+  <img src="https://img.shields.io/github/stars/billlzzz10/UnicornX?style=for-the-badge&color=ff80bf">
+  <img src="https://img.shields.io/github/last-commit/billlzzz10/UnicornX?style=for-the-badge&color=48d1cc">
+</div>
 
 ---
 
-## 📦 โครงสร้างรีโป (Repo Structure)
+## 🚀 ลิงก์สำคัญและผลงาน
 
-```
-UnicornX/
-├─ packages/          # source frontend/backend
-├─ docs/              # อาร์ต โลโก้ เอกสาร นิยาย ฯลฯ
-├─ scripts/           # tools/dev script
-├─ .github/           # workflows, templates
-├─ docker-compose.yml
-├─ package.json
-└─ README.md
-```
+- 🪐 [UnicornX-OS (Notion Dashboard)](https://www.notion.so/UnicornX-OS-2205e81a91ff8015a7a9db9a312771e9)
+- 📖 [นิยาย ROF (Read Only Fantasy)](https://www.notion.so/ROF-Story-00c7ea4e34e645cf8f4c9b719c5e9e3e)
+- 🎙️ [Podcast ช่องสร้างแรงบันดาลใจ](https://www.notion.so/UnicornX-OS-2205e81a91ff8015a7a9db9a312771e9)
 
 ---
 
-## 🗺️ Overview Diagram
+## 📊 Dashboard & Stats
 
-```mermaid
-graph TD
-  FE[Frontend<br/>(React/TS)]-->|API|BE(Node.js/Express)
-  BE-->|ORM|DB[(PostgreSQL)]
-  BE-->|Runner|AI[AI Classes]
-  subgraph APIs
-    API1(Content)
-    API2(Podcast)
-    API3(Novel)
-  end
-  FE-->|REST|API1
-  FE-->|REST|API2
-  FE-->|REST|API3
-  BE-->|handle|API1
-  BE-->|handle|API2
-  BE-->|handle|API3
-  BE-->|Cloud|GC[Google Cloud]
-```
+<p align="center">
+  <img src="https://github-readme-stats.vercel.app/api?username=billlzzz10&show_icons=true&theme=radical&hide=prs&icon_color=ff80bf&title_color=7c44c2&text_color=9E8AD7&bg_color=282c34" width="410">
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=billlzzz10&layout=compact&theme=radical&title_color=7c44c2&text_color=9E8AD7&bg_color=282c34" width="330">
+</p>
 
 ---
 
-## 📆 Timeline คร่าว ๆ
+## 🪐 Project Timeline
 
 ```mermaid
 gantt
   dateFormat  YYYY-MM-DD
-  title UnicornX Milestone
-  section Set up
-    Idea & Plan         :done,  des1, 2024-06-01,2024-06-10
-    Infra & Notion      :done,  des2, 2024-06-05,2024-06-18
-  section Develop
-    FE Basic            :active,dev1, 2024-06-17,2024-07-05
-    BE API Core         :        dev2, 2024-06-20,2024-07-10
-    DB Schema           :        dev3, 2024-06-24,2024-07-08
-    AI Integration      :        dev4, 2024-06-28,2024-07-15
-  section Next Steps
-    Dashboard           :        dash, 2024-07-06,2024-07-20
-    Content Import      :        cont, 2024-07-10,2024-07-30
+  title UnicornX Project Timeline
+  section การวางแผน
+    Idea & Design         :done,    des1, 2024-06-01,2024-06-15
+    Notion Dashboard      :done,    des2, 2024-06-10,2024-06-20
+  section พัฒนา
+    Frontend (React/TS)   :active,  dev1, 2024-06-20,2024-07-10
+    Backend (Node.js)     :         dev2, 2024-06-25,2024-07-15
+    API Integration       :         dev3, 2024-07-01,2024-07-20
+    AI Core Runner        :         dev4, 2024-07-10,2024-07-25
+  section ต่อยอด
+    Podcast/Novel Publish :         pub1, 2024-07-25,2024-08-10
+    Dashboard Analytics   :         pub2, 2024-07-28,2024-08-15
 ```
-
 ---
 
-## 🧑‍💻 เชื่อมโยง AI กับ API (Runner Classes)
+## 🧩 โมดูลเชื่อมโยงแพลตฟอร์ม-ดาต้าเบส-API
+---
+```mermaid
+graph TD
+  U[UnicornX Platform]:::platform
+  FE[Frontend<br/>(React/TS)]:::frontend --> U
+  BE[Backend<br/>(Node.js)]:::backend --> U
+  DB[(Database<br/>PostgreSQL)]:::db --> BE
 
+  AI[AI Runner Classes<br/>(GPT-4o, Gemini, Claude)]:::ai --> BE
+  API1[Content API]:::api --> BE
+  API2[Podcast API]:::api --> BE
+  API3[Novel API]:::api --> BE
+
+  FE --> API1
+  FE --> API2
+  FE --> API3
+
+  classDef platform fill:#7c44c2,stroke:#fff,stroke-width:2px;
+  classDef frontend fill:#48d1cc,stroke:#fff;
+  classDef backend fill:#9E8AD7,stroke:#fff;
+  classDef db fill:#ff80bf,stroke:#fff;
+  classDef ai fill:#fcb900,stroke:#282c34;
+  classDef api fill:#e75480,stroke:#fff;
+```
+---
+
+## 🔗 การเชื่อมโยง API กับ AI Runner Classes
+---
 ```mermaid
 flowchart LR
-  FE[Frontend] --> BE[Backend]
-  BE --> API1[Content API]
-  BE --> API2[Podcast API]
-  BE --> API3[Novel API]
-  BE -->|invoke| GPT4o[Runner: GPT-4o]
-  BE -->|invoke| Gemini[Runner: Gemini]
-  BE -->|invoke| Claude[Runner: Claude]
+  FE[Frontend] --> API[API Gateway]
+  API -->|REST/GraphQL| BE[Backend]
+  BE -->|invoke| AI1[GPT-4o Runner]
+  BE -->|invoke| AI2[Gemini Runner]
+  BE -->|invoke| AI3[Claude Runner]
+  AI1 -->|ตอบกลับ| BE
+  AI2 -->|ตอบกลับ| BE
+  AI3 -->|ตอบกลับ| BE
+  BE --> API --> FE
+```
+---
+
+## 🗂️ โครงสร้างรีโป
+---
+<details>
+<summary>คลิกเพื่อดูรายละเอียด</summary>
+
+```
+UnicornX/
+├── packages/         # โค้ดหลัก (frontend/backend)
+├── docs/             # เอกสาร, โลโก้, อาร์ตเวิร์ก, นิยาย
+├── scripts/          # dev tools, automation
+├── .github/          # GitHub Actions, templates
+├── docker-compose.yml
+├── package.json
+├── README.md
+...
+</details>
+
+---
+
+## ⚡ GitHub Actions ตัวอย่าง (CI/CD)
+---
+```yaml
+# .github/workflows/ci.yml
+name: UnicornX CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - run: npm run build
+      - run: npm test
 ```
 
 ---
 
-## ✅ Checklist งานที่เหลือ/สำคัญ
-- [x] โครง repo, Infra เบื้องต้น
-- [ ] สร้าง FE UI เบื้องต้น (React+Vite)
-- [ ] API endpoint: content/podcast/novel
-- [ ] Design schema PostgreSQL v1
-- [ ] AI Runner integration
-- [ ] นำเสนอ Dashboard ใน FE
-- [ ] Sync ข้อมูล/บทความจาก Notion (optional)
-- [ ] ระบบ Auth/Permission (Future)
-- [ ] CI/CD ด้วย Github Actions
-- [ ] Deploy บน Google Cloud (Beta)
+## 🌈 Brand Style
+
+| โทนสี      | Hex       | ตัวอย่าง           |
+|:-----------|:---------:|:------------------:|
+| Violet     | #7c44c2   | ![#7c44c2](https://via.placeholder.com/30/7c44c2/fff?text=+) |
+| Blue       | #48d1cc   | ![#48d1cc](https://via.placeholder.com/30/48d1cc/fff?text=+) |
+| Pink       | #ff80bf   | ![#ff80bf](https://via.placeholder.com/30/ff80bf/fff?text=+) |
+| Gray       | #9E8AD7   | ![#9E8AD7](https://via.placeholder.com/30/9E8AD7/fff?text=+) |
 
 ---
 
-## ℹ️ ข้อมูลอ้างอิงและภายในทีม
-- 🗂️ [UnicornX-OS Notion Internal](https://www.notion.so/UnicornX-OS-2205e81a91ff8015a7a9db9a312771e9)
-
----
-
-> **หมายเหตุ:** สำหรับใช้ภายในทีม UnicornX เท่านั้น  
-> อัพเดตใด ๆ ให้แก้ไขตรงนี้และ Notion ให้ตรงกัน
-
+<div align="center">
+  <b>🌠 UnicornX: สะท้อนจักรวาลแห่งแรงบันดาลใจและเทคโนโลยี 🌠</b><br>
+  <a href="https://www.notion.so/UnicornX-OS-2205e81a91ff8015a7a9db9a312771e9"><img src="https://img.shields.io/badge/Notion-UnicornX--OS-7c44c2?logo=notion&logoColor=fff&style=for-the-badge"></a>
+</div>
 ```
 
 ---
+

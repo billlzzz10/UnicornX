@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Mind-Biome Dashboard</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+
+    tailwind.config = {
+
+      darkMode: 'class',
+
+      theme: {
+
+        extend: {
+
+          colors: {
+
+            primary: {
+
+              50: '#f0f9ff',
+
+              100: '#e0f2fe',
+
+              200: '#bae6fd',
+
+              300: '#7dd3fc',
+
+              400: '#38bdf8',
+
+              500: '#0ea5e9',
+
+              600: '#0284c7',
+
+              700: '#0369a1',
+
+              800: '#075985',
+
+              900: '#0c4a6e',
+
+            },
+
+            secondary: {
+
+              50: '#f5f3ff',
+
+              100: '#ede9fe',
+
+              200: '#ddd6fe',
+
+              300: '#c4b5fd',
+
+              400: '#a78bfa',
+
+              500: '#8b5cf6',
+
+              600: '#7c3aed',
+
+              700: '#6d28d9',
+
+              800: '#5b21b6',
+
+              900: '#4c1d95',
+
+            },
+
+            mood: {
+
+              happy: '#10B981', // green
+
+              calm: '#60A5FA', // blue
+
+              neutral: '#A78BFA', // purple
+
+              anxious: '#FBBF24', // yellow
+
+              sad: '#9CA3AF', // gray
+
+              frustrated: '#F87171', // red
+
+            }
+
+          },
+
+        }
+
+      }
+
+    }
+
+  </script>
+
+  <style type="text/css">
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    
+
+    body {
+
+      font-family: 'Inter', sans-serif;
+
+    }
+
+
+
+    .node {
+
+      transition: all 0.3s ease;
+
+    }
+
+    
+
+    .node:hover {
+
+      filter: brightness(1.2);
+
+      transform: scale(1.05);
+
+    }
+
+    
+
+    .link {
+
+      transition: stroke-opacity 0.3s;
+
+    }
+
+    
+
+    .link:hover {
+
+      stroke-opacity: 1;
+
+    }
+
+
+
+    .tooltip {
+
+      opacity: 0;
+
+      transition: opacity 0.3s;
+
+    }
+
+
+
+    .node:hover + .tooltip {
+
+      opacity: 1;
+
+    }
+
+
+
+    @keyframes pulse {
+
+      0%, 100% {
+
+        transform: scale(1);
+
+        opacity: 0.8;
+
+      }
+
+      50% {
+
+        transform: scale(1.05);
+
+        opacity: 1;
+
+      }
+
+    }
+
+
+
+    .pulse {
+
+      animation: pulse 3s infinite;
+
+    }
+
+
+
+    .card {
+
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    }
+
+    
+
+    .card:hover {
+
+      transform: translateY(-4px);
+
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+
+    }
+
+    
+
+    .progress-bar {
+
+      position: relative;
+
+      overflow: hidden;
+
+    }
+
+    
+
+    .progress-bar::after {
+
+      content: '';
+
+      position: absolute;
+
+      top: 0;
+
+      left: 0;
+
+      bottom: 0;
+
+      right: 0;
+
+      background: linear-gradient(
+
+        90deg, 
+
+        rgba(255,255,255,0) 0%, 
+
+        rgba(255,255,255,0.3) 50%, 
+
+        rgba(255,255,255,0) 100%
+
+      );
+
+      transform: translateX(-100%);
+
+      animation: shimmer 2s infinite;
+
+    }
+
+    
+
+    @keyframes shimmer {
+
+      100% {
+
+        transform: translateX(100%);
+
+      }
+
+    }
+
+
+
+    .task-card {
+
+      cursor: grab;
+
+      transition: all 0.2s ease;
+
+    }
+
+    
+
+    .task-card:active {
+
+      cursor: grabbing;
+
+    }
+
+    
+
+    .task-card.dragging {
+
+      opacity: 0.8;
+
+      transform: scale(1.05);
+
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+
+    }
+
+
+
+    .task-connection {
+
+      pointer-events: none;
+
+      z-index: -1;
+
+    }
+
+
+
+    .mood-tracker-dot {
+
+      transition: all 0.3s ease;
+
+    }
+
+
+
+    .mood-tracker-dot:hover {
+
+      transform: scale(1.5);
+
+    }
+
+
+
+    .subtask-toggle {
+
+      transition: transform 0.3s ease;
+
+    }
+
+
+
+    .subtask-toggle.open {
+
+      transform: rotate(90deg);
+
+    }
+
+
+
+    .subtasks-container {
+
+      overflow: hidden;
+
+      transition: max-height 0.3s ease;
+
+    }
+
+
+
+    .subtasks-container.closed {
+
+      max-height: 0;
+
+    }
+
+
+
+    .subtasks-container.open {
+
+      max-height: 1000px;
+
+    }
+
+
+
+    .recommendation-card {
+
+      transition: all 0.3s ease;
+
+    }
+
+
+
+    .recommendation-card:hover {
+
+      transform: translateY(-5px);
+
+    }
+
+
+
+    .auto-link {
+
+      position: relative;
+
+    }
+
+
+
+    .auto-link::after {
+
+      content: '';
+
+      position: absolute;
+
+      bottom: -2px;
+
+      left: 0;
+
+      width: 100%;
+
+      height: 2px;
+
+      background: currentColor;
+
+      opacity: 0.3;
+
+    }
+
+
+
+    .auto-link:hover::after {
+
+      opacity: 0.7;
+
+    }
+
+  </style>
+
+</head>
+
+<body class="bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+
+  <div class="min-h-screen flex flex-col">
+
+    <!-- Sidebar for desktop -->
+
+    <div class="hidden md:flex fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 z-10">
+
+      <div class="flex flex-col w-full">
+
+        <div class="flex items-center justify-center h-16 px-4 border-b dark:border-gray-700">
+
+          <h1 class="text-xl font-bold text-primary-600 dark:text-primary-400">Mind-Biome</h1>
+
+        </div>
+
+        <nav class="flex-1 px-2 py-4 space-y-1">
+
+          <a href="#" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg">
+
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+
+            </svg>
+
+            Dashboard
+
+          </a>
+
+          <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+
+            </svg>
+
+            Tasks
+
+          </a>
+
+          <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+
+            </svg>
+
+            Analytics
+
+          </a>
+
+          <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+
+            </svg>
+
+            Settings
+
+          </a>
+
+        </nav>
+
+        <div class="p-4 border-t dark:border-gray-700">
+
+          <button id="theme-toggle" class="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+
+            </svg>
+
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+
+            </svg>
+
+            <span class="dark:hidden">Dark Mode</span>
+
+            <span class="hidden dark:block">Light Mode</span>
+
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- Mobile header -->
+
+    <header class="md:hidden bg-white dark:bg-gray-800 shadow-md z-10">
+
+      <div class="flex items-center justify-between h-16 px-4">
+
+        <button id="mobile-menu-button" class="text-gray-600 dark:text-gray-200 focus:outline-none">
+
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+
+          </svg>
+
+        </button>
+
+        <h1 class="text-xl font-bold text-primary-600 dark:text-primary-400">Mind-Biome</h1>
+
+        <button id="mobile-theme-toggle" class="text-gray-600 dark:text-gray-200 focus:outline-none">
+
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+
+          </svg>
+
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+
+          </svg>
+
+        </button>
+
+      </div>
+
+    </header>
+
+
+
+    <!-- Mobile menu -->
+
+    <div id="mobile-menu" class="md:hidden fixed inset-0 bg-gray-900 bg-opacity-50 z-20 hidden">
+
+      <div class="absolute top-0 left-0 w-64 h-full bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 -translate-x-full" id="mobile-menu-content">
+
+        <div class="flex items-center justify-between h-16 px-4 border-b dark:border-gray-700">
+
+          <h1 class="text-xl font-bold text-primary-600 dark:text-primary-400">Mind-Biome</h1>
+
+          <button id="close-mobile-menu" class="text-gray-600 dark:text-gray-200 focus:outline-none">
+
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+
+            </svg>
+
+          </button>
+
+        </div>
+
+        <nav class="px-2 py-4 space-y-1">
+
+          <a href="#" class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 rounded-lg">
+
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+
+            </svg>
+
+            Dashboard
+
+          </a>
+
+          <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+
+            </svg>
+
+            Tasks
+
+          </a>
+
+          <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+
+            </svg>
+
+            Analytics
+
+          </a>
+
+          <a href="#" class="flex items-center px-4 py-3 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+
+            </svg>
+
+            Settings
+
+          </a>
+
+        </nav>
+
+      </div>
+
+    </div>
+
+
+
+    <!-- Main content -->
+
+    <main class="flex-1 md:ml-64 p-4 md:p-8">
+
+      <div class="max-w-7xl mx-auto">
+
+        <!-- Current Mood and Energy Section -->
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Current State</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Mood Selector -->
+
+            <div>
+
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">How are you feeling?</label>
+
+              <div class="grid grid-cols-3 gap-2">
+
+                <button class="mood-button flex flex-col items-center justify-center p-3 rounded-lg border-2 border-transparent hover:border-primary-300 dark:hover:border-primary-600 transition-colors" data-mood="happy">
+
+                  <div class="w-8 h-8 rounded-full bg-mood-happy flex items-center justify-center text-white text-xl mb-1">😊</div>
+
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Happy</span>
+
+                </button>
+
+                <button class="mood-button flex flex-col items-center justify-center p-3 rounded-lg border-2 border-transparent hover:border-primary-300 dark:hover:border-primary-600 transition-colors" data-mood="calm">
+
+                  <div class="w-8 h-8 rounded-full bg-mood-calm flex items-center justify-center text-white text-xl mb-1">😌</div>
+
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Calm</span>
+
+                </button>
+
+                <button class="mood-button flex flex-col items-center justify-center p-3 rounded-lg border-2 border-transparent hover:border-primary-300 dark:hover:border-primary-600 transition-colors" data-mood="neutral">
+
+                  <div class="w-8 h-8 rounded-full bg-mood-neutral flex items-center justify-center text-white text-xl mb-1">😐</div>
+
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Neutral</span>
+
+                </button>
+
+                <button class="mood-button flex flex-col items-center justify-center p-3 rounded-lg border-2 border-transparent hover:border-primary-300 dark:hover:border-primary-600 transition-colors" data-mood="anxious">
+
+                  <div class="w-8 h-8 rounded-full bg-mood-anxious flex items-center justify-center text-white text-xl mb-1">😰</div>
+
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Anxious</span>
+
+                </button>
+
+                <button class="mood-button flex flex-col items-center justify-center p-3 rounded-lg border-2 border-transparent hover:border-primary-300 dark:hover:border-primary-600 transition-colors" data-mood="sad">
+
+                  <div class="w-8 h-8 rounded-full bg-mood-sad flex items-center justify-center text-white text-xl mb-1">😔</div>
+
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Sad</span>
+
+                </button>
+
+                <button class="mood-button flex flex-col items-center justify-center p-3 rounded-lg border-2 border-transparent hover:border-primary-300 dark:hover:border-primary-600 transition-colors" data-mood="frustrated">
+
+                  <div class="w-8 h-8 rounded-full bg-mood-frustrated flex items-center justify-center text-white text-xl mb-1">😤</div>
+
+                  <span class="text-sm text-gray-700 dark:text-gray-300">Frustrated</span>
+
+                </button>
+
+              </div>
+
+            </div>
+
+            
+
+            <!-- Energy Level Slider -->
+
+            <div>
+
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Energy Level</label>
+
+              <div class="mt-1 relative">
+
+                <input type="range" min="1" max="10" value="5" class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer" id="energy-slider">
+
+                <div class="flex justify-between text-xs text-gray-600 dark:text-gray-400 px-1 mt-2">
+
+                  <span>Low Energy</span>
+
+                  <span>High Energy</span>
+
+                </div>
+
+              </div>
+
+              <div class="mt-4">
+
+                <button id="update-state" class="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+
+                  Update My State
+
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- Task Recommendations Section -->
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Recommended Tasks</h2>
+
+          <p class="text-gray-600 dark:text-gray-400 mb-4">Based on your current mood (Calm) and energy level (Medium), here are some tasks that might be suitable:</p>
+
+          
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <!-- Recommendation 1 -->
+
+            <div class="recommendation-card bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+
+              <div class="flex items-start">
+
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-500 dark:text-blue-300">
+
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+
+                  </svg>
+
+                </div>
+
+                <div class="ml-3">
+
+                  <h3 class="text-sm font-medium text-blue-800 dark:text-blue-300">Project Planning</h3>
+
+                  <p class="text-sm text-blue-700 dark:text-blue-400 mt-1">Review and update project roadmap</p>
+
+                  <div class="flex items-center mt-2">
+
+                    <span class="text-xs bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-300 px-2 py-1 rounded">Medium Focus</span>
+
+                    <span class="text-xs bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-300 px-2 py-1 rounded ml-2">45 min</span>
+
+                  </div>
+
+                  <button class="mt-3 text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition-colors">Start Now</button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            
+
+            <!-- Recommendation 2 -->
+
+            <div class="recommendation-card bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+
+              <div class="flex items-start">
+
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center text-purple-500 dark:text-purple-300">
+
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+
+                  </svg>
+
+                </div>
+
+                <div class="ml-3">
+
+                  <h3 class="text-sm font-medium text-purple-800 dark:text-purple-300">Communication</h3>
+
+                  <p class="text-sm text-purple-700 dark:text-purple-400 mt-1">Respond to important emails</p>
+
+                  <div class="flex items-center mt-2">
+
+                    <span class="text-xs bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-300 px-2 py-1 rounded">Medium Focus</span>
+
+                    <span class="text-xs bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-300 px-2 py-1 rounded ml-2">30 min</span>
+
+                  </div>
+
+                  <button class="mt-3 text-sm bg-purple-500 hover:bg-purple-600 text-white px-3 py-1 rounded transition-colors">Start Now</button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            
+
+            <!-- Recommendation 3 -->
+
+            <div class="recommendation-card bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+
+              <div class="flex items-start">
+
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 dark:bg-green-800 flex items-center justify-center text-green-500 dark:text-green-300">
+
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+
+                  </svg>
+
+                </div>
+
+                <div class="ml-3">
+
+                  <h3 class="text-sm font-medium text-green-800 dark:text-green-300">Learning</h3>
+
+                  <p class="text-sm text-green-700 dark:text-green-400 mt-1">Complete the next module in your course</p>
+
+                  <div class="flex items-center mt-2">
+
+                    <span class="text-xs bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-300 px-2 py-1 rounded">Medium Focus</span>
+
+                    <span class="text-xs bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-300 px-2 py-1 rounded ml-2">60 min</span>
+
+                  </div>
+
+                  <button class="mt-3 text-sm bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded transition-colors">Start Now</button>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- Mood Visualization and Mind-Biome -->
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+          <!-- Mood Visualization -->
+
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Mood Patterns</h2>
+
+            <div class="border dark:border-gray-700 rounded-lg p-4">
+
+              <div id="mood-visualization" class="w-full h-64">
+
+                <!-- SVG visualization will be rendered here -->
+
+                <svg width="100%" height="100%" viewBox="0 0 600 250">
+
+                  <!-- X and Y axes -->
+
+                  <line x1="50" y1="200" x2="550" y2="200" stroke="#9CA3AF" stroke-width="2" />
+
+                  <line x1="50" y1="50" x2="50" y2="200" stroke="#9CA3AF" stroke-width="2" />
+
+                  
+
+                  <!-- X axis labels (days) -->
+
+                  <text x="100" y="220" text-anchor="middle" class="text-xs fill-gray-500 dark:fill-gray-400">Mon</text>
+
+                  <text x="183" y="220" text-anchor="middle" class="text-xs fill-gray-500 dark:fill-gray-400">Tue</text>
+
+                  <text x="266" y="220" text-anchor="middle" class="text-xs fill-gray-500 dark:fill-gray-400">Wed</text>
+
+                  <text x="349" y="220" text-anchor="middle" class="text-xs fill-gray-500 dark:fill-gray-400">Thu</text>
+
+                  <text x="432" y="220" text-anchor="middle" class="text-xs fill-gray-500 dark:fill-gray-400">Fri</text>
+
+                  <text x="515" y="220" text-anchor="middle" class="text-xs fill-gray-500 dark:fill-gray-400">Sat</text>
+
+                  
+
+                  <!-- Y axis labels (mood levels) -->
+
+                  <text x="40" y="60" text-anchor="end" class="text-xs fill-gray-500 dark:fill-gray-400">Happy</text>
+
+                  <text x="40" y="95" text-anchor="end" class="text-xs fill-gray-500 dark:fill-gray-400">Calm</text>
+
+                  <text x="40" y="130" text-anchor="end" class="text-xs fill-gray-500 dark:fill-gray-400">Neutral</text>
+
+                  <text x="40" y="165" text-anchor="end" class="text-xs fill-gray-500 dark:fill-gray-400">Anxious</text>
+
+                  <text x="40" y="200" text-anchor="end" class="text-xs fill-gray-500 dark:fill-gray-400">Sad</text>
+
+                  
+
+                  <!-- Mood line -->
+
+                  <path d="M100,95 L183,60 L266,130 L349,95 L432,60 L515,95" fill="none" stroke="#8B5CF6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+
+                  
+
+                  <!-- Mood dots -->
+
+                  <circle cx="100" cy="95" r="6" class="mood-tracker-dot" fill="#8B5CF6" />
+
+                  <circle cx="183" cy="60" r="6" class="mood-tracker-dot" fill="#8B5CF6" />
+
+                  <circle cx="266" cy="130" r="6" class="mood-tracker-dot" fill="#8B5CF6" />
+
+                  <circle cx="349" cy="95" r="6" class="mood-tracker-dot" fill="#8B5CF6" />
+
+                  <circle cx="432" cy="60" r="6" class="mood-tracker-dot" fill="#8B5CF6" />
+
+                  <circle cx="515" cy="95" r="6" class="mood-tracker-dot" fill="#8B5CF6" />
+
+                  
+
+                  <!-- Task completion markers -->
+
+                  <rect x="95" y="95" width="10" height="105" fill="#10B981" fill-opacity="0.2" />
+
+                  <rect x="178" y="60" width="10" height="140" fill="#10B981" fill-opacity="0.2" />
+
+                  <rect x="261" y="130" width="10" height="70" fill="#10B981" fill-opacity="0.2" />
+
+                  <rect x="344" y="95" width="10" height="105" fill="#10B981" fill-opacity="0.2" />
+
+                  <rect x="427" y="60" width="10" height="140" fill="#10B981" fill-opacity="0.2" />
+
+                  <rect x="510" y="95" width="10" height="105" fill="#10B981" fill-opacity="0.2" />
+
+                  
+
+                  <!-- Task completion count -->
+
+                  <text x="100" y="190" text-anchor="middle" class="text-xs fill-green-500">4</text>
+
+                  <text x="183" y="190" text-anchor="middle" class="text-xs fill-green-500">7</text>
+
+                  <text x="266" y="190" text-anchor="middle" class="text-xs fill-green-500">3</text>
+
+                  <text x="349" y="190" text-anchor="middle" class="text-xs fill-green-500">5</text>
+
+                  <text x="432" y="190" text-anchor="middle" class="text-xs fill-green-500">8</text>
+
+                  <text x="515" y="190" text-anchor="middle" class="text-xs fill-green-500">4</text>
+
+                </svg>
+
+              </div>
+
+              <div class="mt-4 flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
+
+                <div class="flex items-center">
+
+                  <span class="inline-block w-3 h-3 bg-purple-500 rounded-full mr-1"></span>
+
+                  <span>Mood</span>
+
+                </div>
+
+                <div class="flex items-center">
+
+                  <span class="inline-block w-3 h-3 bg-green-500 opacity-20 rounded-sm mr-1"></span>
+
+                  <span>Tasks Completed</span>
+
+                </div>
+
+              </div>
+
+              <div class="mt-4">
+
+                <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Insights:</h3>
+
+                <ul class="mt-2 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+
+                  <li class="flex items-start">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-500 mr-1 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+
+                    </svg>
+
+                    You're most productive when you're in a <span class="font-medium text-primary-600 dark:text-primary-400">happy</span> mood
+
+                  </li>
+
+                  <li class="flex items-start">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-primary-500 mr-1 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+
+                    </svg>
+
+                    Your mood tends to improve after completing multiple tasks
+
+                  </li>
+
+                </ul>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          
+
+          <!-- Mind-Biome Visualization -->
+
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Mind-Biome</h2>
+
+            <div class="border dark:border-gray-700 rounded-lg overflow-hidden">
+
+              <div id="mind-biome-visualization" class="w-full h-64 relative">
+
+                <!-- SVG visualization will be rendered here -->
+
+                <svg width="100%" height="100%" viewBox="0 0 600 250">
+
+                  <!-- Background gradient -->
+
+                  <defs>
+
+                    <radialGradient id="background-gradient" cx="50%" cy="50%" r="70%">
+
+                      <stop offset="0%" stop-color="rgba(139, 92, 246, 0.1)" />
+
+                      <stop offset="100%" stop-color="rgba(139, 92, 246, 0)" />
+
+                    </radialGradient>
+
+                  </defs>
+
+                  
+
+                  <rect width="100%" height="100%" fill="url(#background-gradient)" />
+
+                  
+
+                  <!-- Connections -->
+
+                  <line x1="300" y1="125" x2="200" y2="80" class="link" stroke="#CBD5E1" stroke-opacity="0.4" stroke-width="1.5" />
+
+                  <line x1="300" y1="125" x2="400" y2="80" class="link" stroke="#CBD5E1" stroke-opacity="0.4" stroke-width="1.5" />
+
+                  <line x1="300" y1="125" x2="150" y2="150" class="link" stroke="#CBD5E1" stroke-opacity="0.4" stroke-width="1.5" />
+
+                  <line x1="300" y1="125" x2="450" y2="150" class="link" stroke="#CBD5E1" stroke-opacity="0.4" stroke-width="1.5" />
+
+                  <line x1="300" y1="125" x2="200" y2="200" class="link" stroke="#CBD5E1" stroke-opacity="0.4" stroke-width="1.5" />
+
+                  <line x1="300" y1="125" x2="400" y2="200" class="link" stroke="#CBD5E1" stroke-opacity="0.4" stroke-width="1.5" />
+
+                  
+
+                  <line x1="200" y1="80" x2="150" y2="150" class="link" stroke="#CBD5E1" stroke-opacity="0.4" stroke-width="1.5" />
+
+                  <line x1="400" y1="80" x2="450" y2="150" class="link" stroke="#CBD5E1" stroke-opacity="0.4" stroke-width="1.5" />
+
+                  <line x1="150" y1="150" x2="200" y2="200" class="link" stroke="#CBD5E1" stroke-opacity="0.4" stroke-width="1.5" />
+
+                  <line x1="450" y1="150" x2="400" y2="200" class="link" stroke="#CBD5E1" stroke-opacity="0.4" stroke-width="1.5" />
+
+                  
+
+                  <!-- Nodes -->
+
+                  <circle cx="300" cy="125" r="30" class="node pulse" fill="#8B5CF6" fill-opacity="0.8" stroke="#8B5CF6" stroke-width="2" />
+
+                  <circle cx="200" cy="80" r="20" class="node" fill="#3B82F6" fill-opacity="0.8" stroke="#3B82F6" stroke-width="2" />
+
+                  <circle cx="400" cy="80" r="20" class="node" fill="#EC4899" fill-opacity="0.8" stroke="#EC4899" stroke-width="2" />
+
+                  <circle cx="150" cy="150" r="15" class="node" fill="#10B981" fill-opacity="0.8" stroke="#10B981" stroke-width="2" />
+
+                  <circle cx="450" cy="150" r="15" class="node" fill="#F59E0B" fill-opacity="0.8" stroke="#F59E0B" stroke-width="2" />
+
+                  <circle cx="200" cy="200" r="18" class="node" fill="#6366F1" fill-opacity="0.8" stroke="#6366F1" stroke-width="2" />
+
+                  <circle cx="400" cy="200" r="18" class="node" fill="#8B5CF6" fill-opacity="0.8" stroke="#8B5CF6" stroke-width="2" />
+
+                  
+
+                  <!-- Labels -->
+
+                  <text x="300" y="125" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="10">Cognitive Hub</text>
+
+                  <text x="200" y="80" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="8">Memory</text>
+
+                  <text x="400" y="80" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="8">Emotional</text>
+
+                  <text x="150" y="150" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="8">Sensory</text>
+
+                  <text x="450" y="150" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="8">Motor</text>
+
+                  <text x="200" y="200" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="8">Regulatory</text>
+
+                  <text x="400" y="200" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="8">Creative</text>
+
+                </svg>
+
+              </div>
+
+            </div>
+
+            <div class="mt-4">
+
+              <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300">Biome Health:</h3>
+
+              <div class="mt-2 w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+
+                <div class="h-full bg-primary-500 rounded-full progress-bar" style="width: 78%"></div>
+
+              </div>
+
+              <div class="mt-4 grid grid-cols-2 gap-4 text-sm">
+
+                <div>
+
+                  <p class="text-gray-600 dark:text-gray-400">Cognitive Activity</p>
+
+                  <p class="font-medium text-gray-800 dark:text-white">87%</p>
+
+                </div>
+
+                <div>
+
+                  <p class="text-gray-600 dark:text-gray-400">Neural Connections</p>
+
+                  <p class="font-medium text-gray-800 dark:text-white">1,243</p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- Multi-layered Task Management -->
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-2 md:mb-0">Task Management</h2>
+
+            <div class="flex space-x-2">
+
+              <button class="bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg text-sm transition-colors flex items-center">
+
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m6 0H6" />
+
+                </svg>
+
+                Add Task
+
+              </button>
+
+              <div class="relative">
+
+                <select class="appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg py-2 px-4 pr-8 text-gray-700 dark:text-gray-200 text-sm leading-tight focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+
+                  <option>All Tasks</option>
+
+                  <option>Today</option>
+
+                  <option>This Week</option>
+
+                  <option>Completed</option>
+
+                </select>
+
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-200">
+
+                  <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+
+                  </svg>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          
+
+          <div id="task-container" class="space-y-3">
+
+            <!-- Project 1 with subtasks -->
+
+            <div class="task-card border dark:border-gray-700 rounded-lg overflow-hidden">
+
+              <div class="bg-gray-50 dark:bg-gray-750 p-4 flex items-center justify-between">
+
+                <div class="flex items-center">
+
+                  <button class="subtask-toggle mr-2 text-gray-500 dark:text-gray-400 focus:outline-none open">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+
+                    </svg>
+
+                  </button>
+
+                  <div class="flex-shrink-0 w-6 h-6 rounded bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-600 dark:text-primary-400 mr-3">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+
+                    </svg>
+
+                  </div>
+
+                  <div>
+
+                    <h3 class="text-sm font-medium text-gray-800 dark:text-white">Website Redesign Project</h3>
+
+                    <div class="flex items-center mt-1">
+
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Progress: 65%</span>
+
+                      <div class="ml-2 w-24 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+
+                        <div class="h-full bg-primary-500 rounded-full" style="width: 65%"></div>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div class="flex items-center">
+
+                  <span class="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 px-2 py-1 rounded">Due in 5 days</span>
+
+                  <button class="ml-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+
+                    </svg>
+
+                  </button>
+
+                </div>
+
+              </div>
+
+              <div class="subtasks-container open">
+
+                <div class="p-4 space-y-3">
+
+                  <!-- Subtask 1 -->
+
+                  <div class="ml-6 task-card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex items-center justify-between">
+
+                    <div class="flex items-center">
+
+                      <input type="checkbox" class="h-4 w-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 focus:ring-primary-500" checked>
+
+                      <span class="ml-3 text-sm text-gray-800 dark:text-white line-through">Research competitor websites</span>
+
+                    </div>
+
+                    <div class="flex items-center">
+
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Completed</span>
+
+                      <button class="ml-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+
+                        </svg>
+
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                  
+
+                  <!-- Subtask 2 with nested subtasks -->
+
+                  <div class="ml-6">
+
+                    <div class="task-card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex items-center justify-between">
+
+                      <div class="flex items-center">
+
+                        <button class="subtask-toggle mr-2 text-gray-500 dark:text-gray-400 focus:outline-none open">
+
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+
+                          </svg>
+
+                        </button>
+
+                        <input type="checkbox" class="h-4 w-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 focus:ring-primary-500">
+
+                        <span class="ml-3 text-sm text-gray-800 dark:text-white">Create wireframes</span>
+
+                      </div>
+
+                      <div class="flex items-center">
+
+                        <span class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-1 rounded">In Progress</span>
+
+                        <button class="ml-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+
+                          </svg>
+
+                        </button>
+
+                      </div>
+
+                    </div>
+
+                    <div class="subtasks-container open">
+
+                      <div class="p-3 space-y-3">
+
+                        <!-- Nested Subtask 1 -->
+
+                        <div class="ml-6 task-card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex items-center justify-between">
+
+                          <div class="flex items-center">
+
+                            <input type="checkbox" class="h-4 w-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 focus:ring-primary-500" checked>
+
+                            <span class="ml-3 text-sm text-gray-800 dark:text-white line-through">Homepage wireframe</span>
+
+                          </div>
+
+                          <div class="flex items-center">
+
+                            <span class="text-xs text-gray-500 dark:text-gray-400">Completed</span>
+
+                          </div>
+
+                        </div>
+
+                        
+
+                        <!-- Nested Subtask 2 -->
+
+                        <div class="ml-6 task-card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex items-center justify-between">
+
+                          <div class="flex items-center">
+
+                            <input type="checkbox" class="h-4 w-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 focus:ring-primary-500">
+
+                            <span class="ml-3 text-sm text-gray-800 dark:text-white">Product page wireframe</span>
+
+                          </div>
+
+                          <div class="flex items-center">
+
+                            <span class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-1 rounded">In Progress</span>
+
+                          </div>
+
+                        </div>
+
+                        
+
+                        <!-- Nested Subtask 3 -->
+
+                        <div class="ml-6 task-card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex items-center justify-between">
+
+                          <div class="flex items-center">
+
+                            <input type="checkbox" class="h-4 w-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 focus:ring-primary-500">
+
+                            <span class="ml-3 text-sm text-gray-800 dark:text-white">Checkout flow wireframe</span>
+
+                          </div>
+
+                          <div class="flex items-center">
+
+                            <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2 py-1 rounded">Not Started</span>
+
+                          </div>
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  
+
+                  <!-- Subtask 3 -->
+
+                  <div class="ml-6 task-card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3 flex items-center justify-between">
+
+                    <div class="flex items-center">
+
+                      <input type="checkbox" class="h-4 w-4 text-primary-600 rounded border-gray-300 dark:border-gray-600 focus:ring-primary-500">
+
+                      <span class="ml-3 text-sm text-gray-800 dark:text-white">Create visual designs</span>
+
+                    </div>
+
+                    <div class="flex items-center">
+
+                      <span class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 px-2 py-1 rounded">Not Started</span>
+
+                      <button class="ml-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+
+                        </svg>
+
+                      </button>
+
+                    </div>
+
+                  </div>
+
+                  
+
+                  <!-- Add subtask button -->
+
+                  <div class="ml-6 mt-2">
+
+                    <button class="flex items-center text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300">
+
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m6 0H6" />
+
+                      </svg>
+
+                      Add Subtask
+
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            
+
+            <!-- Project 2 -->
+
+            <div class="task-card border dark:border-gray-700 rounded-lg overflow-hidden">
+
+              <div class="bg-gray-50 dark:bg-gray-750 p-4 flex items-center justify-between">
+
+                <div class="flex items-center">
+
+                  <button class="subtask-toggle mr-2 text-gray-500 dark:text-gray-400 focus:outline-none">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+
+                    </svg>
+
+                  </button>
+
+                  <div class="flex-shrink-0 w-6 h-6 rounded bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-400 mr-3">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+
+                    </svg>
+
+                  </div>
+
+                  <div>
+
+                    <h3 class="text-sm font-medium text-gray-800 dark:text-white">Health App Development</h3>
+
+                    <div class="flex items-center mt-1">
+
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Progress: 30%</span>
+
+                      <div class="ml-2 w-24 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+
+                        <div class="h-full bg-green-500 rounded-full" style="width: 30%"></div>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div class="flex items-center">
+
+                  <span class="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 px-2 py-1 rounded">Due in 14 days</span>
+
+                  <button class="ml-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+
+                    </svg>
+
+                  </button>
+
+                </div>
+
+              </div>
+
+              <div class="subtasks-container closed">
+
+                <!-- Subtasks would go here -->
+
+              </div>
+
+            </div>
+
+            
+
+            <!-- Project 3 -->
+
+            <div class="task-card border dark:border-gray-700 rounded-lg overflow-hidden">
+
+              <div class="bg-gray-50 dark:bg-gray-750 p-4 flex items-center justify-between">
+
+                <div class="flex items-center">
+
+                  <button class="subtask-toggle mr-2 text-gray-500 dark:text-gray-400 focus:outline-none">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+
+                    </svg>
+
+                  </button>
+
+                  <div class="flex-shrink-0 w-6 h-6 rounded bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-400 mr-3">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+
+                    </svg>
+
+                  </div>
+
+                  <div>
+
+                    <h3 class="text-sm font-medium text-gray-800 dark:text-white">Course Content Creation</h3>
+
+                    <div class="flex items-center mt-1">
+
+                      <span class="text-xs text-gray-500 dark:text-gray-400">Progress: 10%</span>
+
+                      <div class="ml-2 w-24 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+
+                        <div class="h-full bg-purple-500 rounded-full" style="width: 10%"></div>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+                <div class="flex items-center">
+
+                  <span class="text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-300 px-2 py-1 rounded">Due in 30 days</span>
+
+                  <button class="ml-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+
+                    </svg>
+
+                  </button>
+
+                </div>
+
+              </div>
+
+              <div class="subtasks-container closed">
+
+                <!-- Subtasks would go here -->
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+
+        <!-- AI-powered Content Connections -->
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Content Connections</h2>
+
+          <p class="text-gray-600 dark:text-gray-400 mb-4">AI has discovered these relationships between your notes, tasks, and ideas:</p>
+
+          
+
+          <div class="space-y-4">
+
+            <!-- Connection 1 -->
+
+            <div class="border dark:border-gray-700 rounded-lg p-4">
+
+              <h3 class="text-sm font-medium text-gray-800 dark:text-white mb-2">Website Design & Health App Connection</h3>
+
+              <p class="text-sm text-gray-600 dark:text-gray-400">Your <span class="auto-link text-primary-600 dark:text-primary-400">website redesign project</span> and <span class="auto-link text-primary-600 dark:text-primary-400">health app development</span> share similar UX patterns. Consider reusing components.</p>
+
+              <div class="mt-3 flex items-center justify-between">
+
+                <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+
+                  </svg>
+
+                  AI-detected connection
+
+                </div>
+
+                <button class="text-xs text-primary-600 dark:text-primary-400 hover:underline">View Details</button>
+
+              </div>
+
+            </div>
+
+            
+
+            <!-- Connection 2 -->
+
+            <div class="border dark:border-gray-700 rounded-lg p-4">
+
+              <h3 class="text-sm font-medium text-gray-800 dark:text-white mb-2">Course Content & Meeting Notes</h3>
+
+              <p class="text-sm text-gray-600 dark:text-gray-400">Your <span class="auto-link text-primary-600 dark:text-primary-400">course content creation</span> task could benefit from ideas in your <span class="auto-link text-primary-600 dark:text-primary-400">client meeting notes</span> from last week.</p>
+
+              <div class="mt-3 flex items-center justify-between">
+
+                <div class="flex items-center text-xs text-gray-500 dark:text-gray-400">
+
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+
+                  </svg>
+
+                  AI-detected connection
+
+                </div>
+
+                <button class="text-xs text-primary-600 dark:text-primary-400 hover:underline">View Details</button>
+
+              </div>
+
+            </div>
+
+            
+
+            <!--```

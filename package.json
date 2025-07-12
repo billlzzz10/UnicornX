@@ -1,41 +1,14 @@
 {
-  "name": "unicornx-os",
-  "version": "0.1.0",
-  "description": "UnicornX OS: พันธมิตรผู้ร่วมสร้างการเติบโต - A revolutionary platform for systematic creators",
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
+  "name": "unicornx",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "dev": "npm run dev --workspace=client",
-    "build": "npm run build --workspace=client && npm run build --workspace=server",
-    "start": "npm run start --workspace=server",
-    "lint": "npm run lint --workspace=client",
-    "test": "npm run test --workspaces",
-    "clean": "rm -rf node_modules packages/*/node_modules packages/*/dist packages/*/.next"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "productivity",
-    "adhd",
-    "creators",
-    "workflow",
-    "ai",
-    "typescript",
-    "react",
-    "nextjs",
-    "python",
-    "fastapi"
-  ],
-  "author": "UnicornX Team",
-  "license": "MIT",
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "eslint": "^8.0.0",
-    "prettier": "^3.0.0"
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "tailwindcss": "^4.1.11"
   }
 }
