@@ -19,7 +19,7 @@ import {
 interface NavItem {
   name: string
   href: string
-  icon: React.ComponentType<React.SVGProps<SVGElement>>
+  icon: React.ElementType
   description: string
 }
 
